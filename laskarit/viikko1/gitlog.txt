@@ -1,0 +1,113 @@
+commit cff13ff82a50dc45a9d10a8e073c22fe51bd8674  
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:14:14 2021 +0200
+
+    tiedostoja poistettu ja uudelleennimetty     
+
+ tiedostoja/file2             | 0
+ tiedostoja/{file1 => file22} | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 0d23998d2f98bf2e0aa76aaccf110424a11b1ca3
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:12:57 2021 +0200
+
+    tiedostoja luotu
+
+ tiedostoja/file1 | 0
+ tiedostoja/file2 | 0
+ tiedostoja/file3 | 0
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 5c3d53fcce9e5fd4102cd2daa585d1cbdcd0f7e0
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:08:54 2021 +0200
+
+    muutoksia
+
+ eka.txt    | 4 +---
+ kolmas.txt | 2 +-
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+commit cddf7ef90668be98e9682c770d5a096d0b23b10e
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:07:59 2021 +0200
+
+    tiedosto.txt uudelleennimetty
+
+ tiedosto.txt => eka.txt | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit e8adfb4ace835b9284b0d5071e7e9b027e219992
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:05:08 2021 +0200
+
+    toinen.txt poistettu
+
+ toinen.txt | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit c43c91aa4b7f5337dec7f1fb14e8da5fbfdcba50
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:02:14 2021 +0200
+
+    muutos
+
+ tiedosto.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit c30709a4b0267ba5f4fccb166cc0ebdff011188d
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 07:01:57 2021 +0200
+
+    muutos
+
+ tiedosto.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit a563418b32b40a6388175cd5aeb7fe26f5827961
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 06:57:24 2021 +0200
+
+    jokin tiedosto luotu
+
+ stuff/jokin tiedosto | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 9c4337ecd463630459ab0bfa9fa2dd757cda2b47
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 06:55:29 2021 +0200
+
+    muutoksia
+
+ kolmas.txt | 1 +
+ toinen.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+commit bf136a7467f6e015bcf79940cfc104cf566f2465
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 06:54:26 2021 +0200
+
+    kolmas.txt luotu
+
+ kolmas.txt | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 1f0c73fcb924536c44eccf0b69a7edfb10da7915
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 06:48:36 2021 +0200
+
+    muutos ja lisäys
+
+ tiedosto.txt | 1 +
+ toinen.txt   | 0
+ 2 files changed, 1 insertion(+)
+
+commit 65345122fc8013fccb4fdb8c100e376e5136e648
+Author: Kekalainen <git@kekalainen.me>
+Date:   Tue Mar 23 06:46:38 2021 +0200
+
+    tiedosto.txt luotu
+
+ tiedosto.txt | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
