@@ -1,8 +1,7 @@
 # Chess
 
-## Exercises
+A desktop application which can be used for playing chess, storing past games and viewing them move-by-move.
 
-### Week 1
-
-[gitlog.txt](laskarit/viikko1/gitlog.txt)
-[komentorivi.txt](laskarit/viikko1/komentorivi.txt)
+## Documentation
+[Requirements specification](documentation/requirements_specification.md)
+[Timesheet](documentation/timesheet.md)
