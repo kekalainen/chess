@@ -7,6 +7,7 @@ A desktop application which can be used for playing chess, storing past games an
 The application consists of two windows which are shown simultaneously:
 1. A game window with an interactive chess board
 2. A management panel with tabs for managing the ongoing game, managing saved games and configuring the application
+
 ![UI draft](img/ui-draft.jpg)
 
 ## Core functionality
