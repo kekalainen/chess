@@ -7,4 +7,5 @@
 |  2.4. | 4     | Started writing the application. Implemented the game (board) UI.
 |  3.4. | 5     | Added game classes and icons. Paired basic movement logic with the UI. Added a main window.
 |  4.4. | 1     | Refactoring & formatting code. Added a credits dialog.
-| **Total** | 16
+|  5.4. | 1     | Writing tests and setting up coverage reports.
+| **Total** | 17
