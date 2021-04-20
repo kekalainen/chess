@@ -8,5 +8,5 @@
 |  3.4. | 5     | Added game classes and icons. Paired basic movement logic with the UI. Added a main window.
 |  4.4. | 1     | Refactoring & formatting code. Added a credits dialog.
 |  5.4. | 1     | Writing tests and setting up coverage reports.
-| 20.4. | 4     | Implemented basic move generation & validation. Added the rook piece.
+| 20.4. | 4     | Implemented basic move generation & validation. Added the rook piece. Added more tests.
 | **Total** | 21
