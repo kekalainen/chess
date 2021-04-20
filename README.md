@@ -38,6 +38,12 @@ Generate a coverage report using the following command:
 poetry run invoke coverage-report
 ```
 
+Run lint checks using the following command:
+
+```console
+poetry run invoke lint
+```
+
 ## Attributions
 
 > Font Awesome Free 5.15.3 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0)
