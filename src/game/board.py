@@ -3,10 +3,9 @@ from game.move import Move
 
 
 class Board:
-    width = 8
-    moves = []
-
     def __init__(self):
+        self.width = 8
+        self.moves = []
         self.pieces = [[None] * self.width for i in range(self.width)]
         for t in [(1, False), (6, True)]:
             for x in range(self.width):
@@ -62,7 +61,10 @@ class Board:
         return True
 
     def get_legal_moves(self, x, y):
-        moves = self.get_piece(x, y).moves()
+        piece = self.get_piece(x, y)
+        if not piece:
+            return []
+        moves = piece.moves()
         legal_moves = []
         for move in moves:
             move_relative = (move[0] + x, move[1] + y)
