@@ -2,7 +2,7 @@ from os import path
 import tkinter as tk
 from PIL import Image, ImageTk
 
-from game.pieces import Pawn
+from game.pieces import Pawn, Rook
 
 
 class BoardFrame(tk.Frame):
@@ -21,6 +21,7 @@ class BoardFrame(tk.Frame):
         self.selected_color = "#FF0000"
 
         self.selected_tile = None
+        self.legal_tiles = []
 
         self.drawn_tiles = []
         self.drawn_pieces = []
@@ -36,7 +37,7 @@ class BoardFrame(tk.Frame):
         self.piece_images = {}
         img_dir_path = path.dirname(path.realpath(__file__)) + "/../img/pieces/"
         for color in ["w", "b"]:
-            for piece in [Pawn]:
+            for piece in [Pawn, Rook]:
                 img_path = img_dir_path + piece.__name__.lower() + "_" + color + ".png"
                 img = Image.open(img_path)
                 dimension = self.tile_width / 10 * 7
@@ -68,6 +69,8 @@ class BoardFrame(tk.Frame):
                 y2 = y1 + self.tile_width - outline_width
                 outline = color = self.tile_colors[(x + y) % 2]
                 if self.selected_tile == (x, y):
+                    outline = self.selected_color
+                elif (x, y) in self.legal_tiles:
                     outline = self.selected_color
                 tile = self.board_canvas.create_rectangle(
                     x1 + self.canvas_base_offset,
@@ -107,6 +110,7 @@ class BoardFrame(tk.Frame):
         if not self.selected_tile:
             if self.board.get_piece(x, y):
                 self.selected_tile = tile
+                self.legal_tiles = self.board.get_legal_moves(x, y)
                 self.draw_board()
         else:
             self.board.move_piece(
@@ -117,4 +121,5 @@ class BoardFrame(tk.Frame):
 
     def deselect_tile(self, event=None):
         self.selected_tile = None
+        self.legal_tiles = []
         self.draw_tiles()
