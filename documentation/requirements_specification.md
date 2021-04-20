@@ -11,7 +11,7 @@ The application consists of two windows which are shown simultaneously:
 ![UI draft](img/ui-draft.jpg)
 
 ## Core functionality
-- Chess move generation and validation with a basic rule set
+- Chess move generation and validation with a basic rule set ✔️
 - Local two-player chess
 - Saving and loading games to/from a local database
     - viewing past games move-by-move
