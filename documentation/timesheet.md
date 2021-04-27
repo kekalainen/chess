@@ -9,5 +9,5 @@
 |  4.4. | 1     | Refactoring & formatting code. Added a credits dialog.
 |  5.4. | 1     | Writing tests and setting up coverage reports.
 | 20.4. | 5     | Implemented basic move generation & validation. Added the rook piece. Added more tests. Drafted a class diagram.
-| 27.4. | 1     | Added the remaining pieces.
-| **Total** | 23
+| 27.4. | 4     | Added the remaining pieces. Added an initial game class. Drafted a sequence diagram.
+| **Total** | 26

@@ -10,6 +10,9 @@ A desktop application which can be used for playing chess, storing past games an
 
 [Timesheet](documentation/timesheet.md)
 
+## Releases
+* [Week 5](/releases/tag/viikko5)
+
 ## Installation
 
 Start by installing [Python](https://www.python.org/) and [Poetry](https://python-poetry.org/).
