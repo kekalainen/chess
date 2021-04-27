@@ -6,10 +6,11 @@ from game.pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
 class BoardFrame(tk.Frame):
-    def __init__(self, master=None, board=None, tile_width=100):
+    def __init__(self, master=None, game=None, tile_width=100):
         super().__init__(master)
         self.master = master
-        self.board = board
+        self.game = game
+        self.board = game.board
 
         self.pack(expand=tk.TRUE, fill=tk.BOTH)
         self.board_canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0)
@@ -47,7 +48,7 @@ class BoardFrame(tk.Frame):
                 ] = ImageTk.PhotoImage(img)
 
     def undo_move(self, event):
-        self.board.undo_move()
+        self.game.undo_move()
         self.deselect_tile()
         self.draw_pieces()
 
@@ -113,9 +114,7 @@ class BoardFrame(tk.Frame):
                 self.legal_tiles = self.board.get_legal_moves(x, y)
                 self.draw_board()
         else:
-            self.board.move_piece(
-                (self.selected_tile[0], self.selected_tile[1]), (x, y)
-            )
+            self.game.move_piece((self.selected_tile[0], self.selected_tile[1]), (x, y))
             self.deselect_tile()
             self.draw_pieces()
 

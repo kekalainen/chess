@@ -3,7 +3,8 @@ from game.move import Move
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         self.width = 8
         self.moves = []
         self.pieces = [[None] * self.width for i in range(self.width)]
@@ -64,6 +65,9 @@ class Board:
                     from_xy[1] + (vertical * i * positive_y if vertical else 0),
                 ):
                     return False
+
+        if not self.game.is_legal_move(from_xy, to_xy, piece, occupant):
+            return False
 
         return True
 

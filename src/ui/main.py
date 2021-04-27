@@ -1,8 +1,9 @@
 import tkinter as tk
 import tkinter.messagebox
+from tkinter.ttk import Notebook
 
 from .board import BoardFrame
-from game.board import Board
+from game.game import Game
 
 
 class MainFrame(tk.Frame):
@@ -20,11 +21,24 @@ class MainFrame(tk.Frame):
         padx = 10
         pady = 5
 
-        start_btn = tk.Button(self, text="Play", command=self.start_game)
-        start_btn.grid(row=0, column=1, padx=padx, pady=pady)
+        tabs = Notebook(self)
+        tabs.grid(row=0, column=0)
+
+        tabs_game = tk.Frame(tabs)
+        tabs.add(tabs_game, text="Game")
+
+        self.start_btn = tk.Button(tabs_game, text="Play", command=self.start_game)
+        self.start_btn.grid(row=0, column=0, padx=padx, pady=pady)
+
+        self.move_label = tk.Label(tabs_game, text="")
+        self.move_label.grid(row=1, column=0, padx=padx, pady=pady)
+        self.move_label.grid_remove()
+
+        tabs_settings = tk.Frame(tabs)
+        tabs.add(tabs_settings, text="Settings")
 
         credits_btn = tk.Button(
-            self,
+            tabs_settings,
             text="Credits",
             command=lambda: tk.messagebox.showinfo(
                 title="Credits",
@@ -36,34 +50,48 @@ class MainFrame(tk.Frame):
                 ),
             ),
         )
-        credits_btn.grid(row=1, column=1, padx=padx, pady=pady)
+        credits_btn.grid(row=0, column=0, padx=padx, pady=pady)
 
         quit_btn = tk.Button(self, text="Quit", command=self.master.destroy)
-        quit_btn.grid(row=2, column=1, padx=padx, pady=pady)
+        quit_btn.grid(row=1, column=0, padx=padx, pady=pady)
 
         self.grid()
 
+    def on_game_update(self):
+        text = "White to move"
+        if not self.game.white_to_move:
+            text = "Black to move"
+        self.move_label["text"] = text
+
     def start_game(self):
-        if not hasattr(self, "board"):
-            self.board = Board()
-            dimension = self.board.width * self.board_tile_width
+        if not hasattr(self, "game"):
+            self.game = Game(self.on_game_update)
+            self.board_dimension = self.game.board.width * self.board_tile_width
             self.board_window = tk.Toplevel(master=self)
-            x = self.master.winfo_x() - dimension - 4
+            x = self.master.winfo_x() - self.board_dimension - 4
             y = self.master.winfo_y()
-            self.board_window.geometry("%dx%d+%d+%d" % (dimension, dimension, x, y))
+            self.board_window.geometry(
+                "%dx%d+%d+%d" % (self.board_dimension, self.board_dimension, x, y)
+            )
             self.board_window.resizable(False, False)
             self.board_frame = BoardFrame(
-                self.board_window, board=self.board, tile_width=self.board_tile_width
+                self.board_window, game=self.game, tile_width=self.board_tile_width
             )
             self.master.bind("<Configure>", self.board_window_follow)
             self.board_window.protocol("WM_DELETE_WINDOW", self.on_board_window_close)
 
+            self.start_btn.grid_remove()
+            self.move_label.grid()
+            self.on_game_update()
+
     def board_window_follow(self, event=None):
-        x = self.master.winfo_x() - self.board_window.winfo_width() - 4
+        x = self.master.winfo_x() - self.board_dimension - 4
         y = self.master.winfo_y()
         self.board_window.geometry("+%d+%d" % (x, y))
 
     def on_board_window_close(self):
-        delattr(self, "board")
+        delattr(self, "game")
         self.master.unbind("<Configure>")
         self.board_window.destroy()
+        self.start_btn.grid()
+        self.move_label.grid_remove()
