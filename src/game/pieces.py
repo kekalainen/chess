@@ -2,6 +2,7 @@ class Piece:
     horizontal = True
     vertical = True
     diagonal = True
+    can_move_over_other_pieces = False
     range = 1
 
     def __init__(self, white: bool, board_width: int):
@@ -16,16 +17,14 @@ class Piece:
 
     def moves(self):
         moves = []
-        h = self.range if self.horizontal else 1
-        v = self.range if self.vertical else 1
-        for x in range(-h if self.horizontal else 0, h if self.horizontal else 1):
-            for y in range(-v if self.vertical else 0, v if self.vertical else 1):
-                if self.diagonal:
-                    if abs(x) != abs(y):
-                        continue
-                elif x != 0 and y != 0:
-                    continue
-                moves.append((x, y))
+        for x in range(-self.range, self.range + 1):
+            for y in range(-self.range, self.range + 1):
+                if self.diagonal and abs(x) == abs(y):
+                    moves.append((x, y))
+                elif self.horizontal and x == 0:
+                    moves.append((x, y))
+                elif self.vertical and y == 0:
+                    moves.append((x, y))
         return moves
 
     def is_legal_move(self, from_xy, to_xy, occupant):
@@ -66,7 +65,31 @@ class Pawn(Piece):
         return True
 
 
+class Knight(Piece):
+    name = "N"
+    can_move_over_other_pieces = True
+
+    def moves(self):
+        return [(-1, 2), (1, 2), (2, -1), (2, 1), (-1, -2), (1, -2), (-2, -1), (-2, 1)]
+
+
+class Bishop(Piece):
+    name = "B"
+    horizontal = False
+    vertical = False
+    range = float("inf")
+
+
 class Rook(Piece):
     name = "R"
     diagonal = False
     range = float("inf")
+
+
+class Queen(Piece):
+    name = "Q"
+    range = float("inf")
+
+
+class King(Piece):
+    name = "K"

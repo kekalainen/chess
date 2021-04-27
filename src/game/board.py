@@ -1,4 +1,4 @@
-from game.pieces import Pawn, Rook
+from game.pieces import Pawn, Knight, Bishop, Rook, Queen, King
 from game.move import Move
 
 
@@ -7,12 +7,18 @@ class Board:
         self.width = 8
         self.moves = []
         self.pieces = [[None] * self.width for i in range(self.width)]
-        for t in [(1, False), (6, True)]:
+        for y_white in [(1, False), (self.width - 2, True)]:
             for x in range(self.width):
-                self.pieces[x][t[0]] = Pawn(t[1], self.width)
-        for t in [(0, False), (self.width - 1, True)]:
+                self.pieces[x][y_white[0]] = Pawn(y_white[1], self.width)
+        for y_white in [(0, False), (self.width - 1, True)]:
+            for x in [1, self.width - 2]:
+                self.pieces[x][y_white[0]] = Knight(y_white[1], self.width)
+            for x in [2, self.width - 3]:
+                self.pieces[x][y_white[0]] = Bishop(y_white[1], self.width)
             for x in [0, self.width - 1]:
-                self.pieces[x][t[0]] = Rook(t[1], self.width)
+                self.pieces[x][y_white[0]] = Rook(y_white[1], self.width)
+            self.pieces[3][y_white[0]] = Queen(y_white[1], self.width)
+            self.pieces[self.width - 4][y_white[0]] = King(y_white[1], self.width)
 
     def is_in_bounds(self, x, y):
         return x < self.width and y < self.width
@@ -45,18 +51,19 @@ class Board:
             return False
 
         # Ensure there are no other pieces between the moving piece and its destination.
-        diff_x = from_xy[0] - to_xy[0]
-        diff_y = from_xy[1] - to_xy[1]
-        horizontal = 0 if diff_x == 0 else 1
-        vertical = 0 if diff_y == 0 else 1
-        positive_x = 1 if diff_x < 0 else -1
-        positive_y = 1 if diff_y < 0 else -1
-        for i in range(1, max(abs(diff_x), abs(diff_y))):
-            if self.get_piece(
-                from_xy[0] + (horizontal * i * positive_x if horizontal else 0),
-                from_xy[1] + (vertical * i * positive_y if vertical else 0),
-            ):
-                return False
+        if not piece.can_move_over_other_pieces:
+            diff_x = from_xy[0] - to_xy[0]
+            diff_y = from_xy[1] - to_xy[1]
+            horizontal = 0 if diff_x == 0 else 1
+            vertical = 0 if diff_y == 0 else 1
+            positive_x = 1 if diff_x < 0 else -1
+            positive_y = 1 if diff_y < 0 else -1
+            for i in range(1, max(abs(diff_x), abs(diff_y))):
+                if self.get_piece(
+                    from_xy[0] + (horizontal * i * positive_x if horizontal else 0),
+                    from_xy[1] + (vertical * i * positive_y if vertical else 0),
+                ):
+                    return False
 
         return True
 

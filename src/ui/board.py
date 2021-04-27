@@ -2,7 +2,7 @@ from os import path
 import tkinter as tk
 from PIL import Image, ImageTk
 
-from game.pieces import Pawn, Rook
+from game.pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
 class BoardFrame(tk.Frame):
@@ -37,7 +37,7 @@ class BoardFrame(tk.Frame):
         self.piece_images = {}
         img_dir_path = path.dirname(path.realpath(__file__)) + "/../img/pieces/"
         for color in ["w", "b"]:
-            for piece in [Pawn, Rook]:
+            for piece in [Pawn, Knight, Bishop, Rook, Queen, King]:
                 img_path = img_dir_path + piece.__name__.lower() + "_" + color + ".png"
                 img = Image.open(img_path)
                 dimension = self.tile_width / 10 * 7
