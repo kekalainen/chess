@@ -11,7 +11,7 @@ def bootstrap():
     root.iconphoto(
         root._w,
         tk.PhotoImage(
-            file=path.dirname(path.realpath(__file__)) + "/../img/pieces/pawn_b.png"
+            file=path.dirname(path.realpath(__file__)) + "/../img/pieces/knight_b.png"
         ),
     )
 
