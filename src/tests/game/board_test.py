@@ -36,18 +36,6 @@ class TestBoard(unittest.TestCase):
         self.board.move_piece((0, 1), (0, 2))
         self.assertFalse(self.board.is_legal_move((0, 2), (0, 4)))
 
-    def test_get_legal_moves_empty_list_for_empty_tile(self):
-        self.assertEqual(self.board.get_legal_moves(3, 3), [])
-
-    def test_get_legal_moves_white_pawn(self):
-        self.assertEqual(
-            self.board.get_legal_moves(self.board.width // 2, self.board.width - 2),
-            [
-                (self.board.width // 2, self.board.width - 3),
-                (self.board.width // 2, self.board.width - 4),
-            ],
-        )
-
     def test_undo_move_no_moves(self):
         self.assertFalse(self.board.undo_move())
 

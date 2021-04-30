@@ -3,8 +3,7 @@ from game.move import Move
 
 
 class Board:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
         self.width = 8
         self.moves = []
         self.pieces = [[None] * self.width for i in range(self.width)]
@@ -22,14 +21,24 @@ class Board:
             self.pieces[self.width - 4][y_white[0]] = King(y_white[1], self.width)
 
     def is_in_bounds(self, x, y):
-        return x < self.width and y < self.width
+        return x >= 0 and x < self.width and y >= 0 and y < self.width
 
     def get_piece(self, x, y):
         if not self.is_in_bounds(x, y):
             return None
         return self.pieces[x][y]
 
+    def get_king_coordinates(self, white):
+        """Gets the coordinates of the specified player's king."""
+        for y in range(self.width):
+            for x in range(self.width):
+                piece = self.get_piece(x, y)
+                if piece and piece.is_white() == white and piece.name.upper() == "K":
+                    return (x, y)
+
     def is_legal_move(self, from_xy, to_xy):
+        """Determines if a move is legal, ignoring checks."""
+
         if from_xy == to_xy:
             return False
 
@@ -66,22 +75,7 @@ class Board:
                 ):
                     return False
 
-        if not self.game.is_legal_move(from_xy, to_xy, piece, occupant):
-            return False
-
         return True
-
-    def get_legal_moves(self, x, y):
-        piece = self.get_piece(x, y)
-        if not piece:
-            return []
-        moves = piece.moves()
-        legal_moves = []
-        for move in moves:
-            move_relative = (move[0] + x, move[1] + y)
-            if self.is_legal_move((x, y), move_relative):
-                legal_moves.append(move_relative)
-        return legal_moves
 
     def move_piece(self, from_xy, to_xy):
         if not self.is_legal_move(from_xy, to_xy):

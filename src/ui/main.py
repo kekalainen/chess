@@ -22,7 +22,7 @@ class MainFrame(tk.Frame):
         pady = 5
 
         tabs = Notebook(self)
-        tabs.grid(row=0, column=0)
+        tabs.grid(row=0, column=0, sticky="NW")
 
         tabs_game = tk.Frame(tabs)
         tabs.add(tabs_game, text="Game")
@@ -30,9 +30,9 @@ class MainFrame(tk.Frame):
         self.start_btn = tk.Button(tabs_game, text="Play", command=self.start_game)
         self.start_btn.grid(row=0, column=0, padx=padx, pady=pady)
 
-        self.move_label = tk.Label(tabs_game, text="")
-        self.move_label.grid(row=1, column=0, padx=padx, pady=pady)
-        self.move_label.grid_remove()
+        self.status_label = tk.Label(tabs_game, text="")
+        self.status_label.grid(row=1, column=0, padx=padx, pady=pady)
+        self.status_label.grid_remove()
 
         tabs_settings = tk.Frame(tabs)
         tabs.add(tabs_settings, text="Settings")
@@ -53,15 +53,31 @@ class MainFrame(tk.Frame):
         credits_btn.grid(row=0, column=0, padx=padx, pady=pady)
 
         quit_btn = tk.Button(self, text="Quit", command=self.master.destroy)
-        quit_btn.grid(row=1, column=0, padx=padx, pady=pady)
+        quit_btn.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
 
         self.grid()
 
     def on_game_update(self):
-        text = "White to move"
-        if not self.game.white_to_move:
-            text = "Black to move"
-        self.move_label["text"] = text
+        text = ""
+
+        if self.game.check and not self.game.checkmate:
+            text += "Check. "
+
+        if self.game.white_to_move:
+            text += "White to move."
+        else:
+            text += "Black to move."
+
+        if self.game.checkmate:
+            text = "Checkmate."
+            if not self.game.white_to_move:
+                text += " White wins."
+            else:
+                text += " Black wins."
+        elif self.game.stalemate:
+            text = "Stalemate. Draw."
+
+        self.status_label["text"] = text
 
     def start_game(self):
         if not hasattr(self, "game"):
@@ -81,7 +97,7 @@ class MainFrame(tk.Frame):
             self.board_window.protocol("WM_DELETE_WINDOW", self.on_board_window_close)
 
             self.start_btn.grid_remove()
-            self.move_label.grid()
+            self.status_label.grid()
             self.on_game_update()
 
     def board_window_follow(self, event=None):
@@ -94,4 +110,4 @@ class MainFrame(tk.Frame):
         self.master.unbind("<Configure>")
         self.board_window.destroy()
         self.start_btn.grid()
-        self.move_label.grid_remove()
+        self.status_label.grid_remove()
