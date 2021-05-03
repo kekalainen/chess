@@ -1,4 +1,4 @@
-from game.pieces import Pawn, Knight, Bishop, Rook, Queen, King
+from game.pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King
 from game.move import Move
 
 
@@ -6,19 +6,47 @@ class Board:
     def __init__(self):
         self.width = 8
         self.moves = []
+        self.load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+
+    def clear_pieces(self):
         self.pieces = [[None] * self.width for i in range(self.width)]
-        for y_white in [(1, False), (self.width - 2, True)]:
-            for x in range(self.width):
-                self.pieces[x][y_white[0]] = Pawn(y_white[1], self.width)
-        for y_white in [(0, False), (self.width - 1, True)]:
-            for x in [1, self.width - 2]:
-                self.pieces[x][y_white[0]] = Knight(y_white[1], self.width)
-            for x in [2, self.width - 3]:
-                self.pieces[x][y_white[0]] = Bishop(y_white[1], self.width)
-            for x in [0, self.width - 1]:
-                self.pieces[x][y_white[0]] = Rook(y_white[1], self.width)
-            self.pieces[3][y_white[0]] = Queen(y_white[1], self.width)
-            self.pieces[self.width - 4][y_white[0]] = King(y_white[1], self.width)
+
+    def set_piece(self, x, y, piece):
+        if not isinstance(piece, Piece):
+            return False
+        self.pieces[x][y] = piece
+        return True
+
+    def load_fen(self, fen):
+        """Load a board position described in Forsyth–Edwards Notation."""
+        self.clear_pieces()
+        self.fen = fen
+        x = y = 0
+        for char in fen:
+            if char.isnumeric():
+                x += int(char)
+            else:
+                if char == "/":
+                    x = 0
+                    y += 1
+                elif char == " ":
+                    break
+                else:
+                    piece_name = char.upper()
+                    if piece_name == "P":
+                        piece = Pawn(char.isupper(), self.width)
+                    elif piece_name == "N":
+                        piece = Knight(char.isupper(), self.width)
+                    elif piece_name == "B":
+                        piece = Bishop(char.isupper(), self.width)
+                    elif piece_name == "R":
+                        piece = Rook(char.isupper(), self.width)
+                    elif piece_name == "Q":
+                        piece = Queen(char.isupper(), self.width)
+                    elif piece_name == "K":
+                        piece = King(char.isupper(), self.width)
+                    self.set_piece(x, y, piece)
+                    x += 1
 
     def is_in_bounds(self, x, y):
         return x >= 0 and x < self.width and y >= 0 and y < self.width

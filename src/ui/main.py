@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
 from tkinter.ttk import Notebook
+from tkinter.scrolledtext import ScrolledText
 
 from .board import BoardFrame
 from game.game import Game
@@ -15,7 +16,7 @@ class MainFrame(tk.Frame):
 
         x = self.master.winfo_screenwidth() // 2 - 150
         y = self.master.winfo_screenheight() // 2 - 50
-        self.master.geometry("%dx%d+%d+%d" % (300, 125, x, y))
+        self.master.geometry("%dx%d+%d+%d" % (300, 175, x, y))
         self.master.resizable(False, False)
 
         padx = 10
@@ -30,9 +31,17 @@ class MainFrame(tk.Frame):
         self.start_btn = tk.Button(tabs_game, text="Play", command=self.start_game)
         self.start_btn.grid(row=0, column=0, padx=padx, pady=pady)
 
-        self.status_label = tk.Label(tabs_game, text="")
-        self.status_label.grid(row=1, column=0, padx=padx, pady=pady)
-        self.status_label.grid_remove()
+        self.status_frame = tk.Frame(tabs_game)
+        self.status_frame.grid(row=1, column=0, padx=padx, pady=pady)
+        self.status_frame.grid_remove()
+
+        self.status_label = tk.Label(self.status_frame, text="")
+        self.status_label.grid(row=0, column=0, pady=pady, sticky="NW")
+
+        self.moves_text = ScrolledText(
+            self.status_frame, width=20, height=3, state=tk.DISABLED
+        )
+        self.moves_text.grid(row=1, column=0, pady=pady)
 
         tabs_settings = tk.Frame(tabs)
         tabs.add(tabs_settings, text="Settings")
@@ -79,6 +88,22 @@ class MainFrame(tk.Frame):
 
         self.status_label["text"] = text
 
+        move_log = ""
+        for i in range(len(self.game.an_moves)):
+            if i % 2 == 0:
+                move_log += str(i // 2 + 1) + ". "
+            move_log += self.game.an_moves[i]
+            if i % 2 == 0:
+                move_log += " "
+            else:
+                move_log += "\n"
+
+        self.moves_text.config(state=tk.NORMAL)
+        self.moves_text.delete("1.0", tk.END)
+        self.moves_text.insert(1.0, move_log)
+        self.moves_text.config(state=tk.DISABLED)
+        self.moves_text.yview(tk.END)
+
     def start_game(self):
         if not hasattr(self, "game"):
             self.game = Game(self.on_game_update)
@@ -97,7 +122,7 @@ class MainFrame(tk.Frame):
             self.board_window.protocol("WM_DELETE_WINDOW", self.on_board_window_close)
 
             self.start_btn.grid_remove()
-            self.status_label.grid()
+            self.status_frame.grid()
             self.on_game_update()
 
     def board_window_follow(self, event=None):
@@ -110,4 +135,4 @@ class MainFrame(tk.Frame):
         self.master.unbind("<Configure>")
         self.board_window.destroy()
         self.start_btn.grid()
-        self.status_label.grid_remove()
+        self.status_frame.grid_remove()

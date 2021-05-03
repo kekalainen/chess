@@ -1,3 +1,6 @@
+from string import ascii_lowercase
+import re
+
 from game.board import Board
 
 
@@ -8,6 +11,7 @@ class Game:
         if on_update:
             self.dispatch_update = on_update
         self.generate_legal_moves()
+        self.an_moves = []
 
     def generate_all_moves(self, white_to_move):
         """Generate all legal moves for the specified player, ignoring checks."""
@@ -79,19 +83,102 @@ class Game:
     def switch_color_to_move(self):
         self.white_to_move = not self.white_to_move
 
+    def store_move_an(self, move, previous_legal_moves):
+        """Store a move in algebraic notation."""
+
+        an = move.piece.name.upper()
+        if an == "P":
+            an = ""
+
+        # Specify initial column, file or both for ambiguous moves.
+        ambiguous_moves = []
+        for from_xy in previous_legal_moves:
+            if (
+                from_xy != (move.from_x, move.from_y)
+                and self.board.get_piece(from_xy[0], from_xy[1]).name == move.piece.name
+            ):
+                for to_xy in previous_legal_moves[from_xy]:
+                    if to_xy == (move.to_x, move.to_y):
+                        ambiguous_moves.append(from_xy)
+        if ambiguous_moves:
+            ambiguous_x = ambiguous_y = False
+
+            for from_xy in ambiguous_moves:
+                if from_xy[0] == move.from_x:
+                    ambiguous_x = True
+                elif from_xy[1] == move.from_y:
+                    ambiguous_y = True
+
+            if ambiguous_x and ambiguous_y:
+                an += ascii_lowercase[move.from_x] + str(self.board.width - move.from_y)
+            else:
+                if ambiguous_x:
+                    an += str(self.board.width - move.from_y)
+                if ambiguous_y:
+                    an += ascii_lowercase[move.from_x]
+
+        if move.captured_piece:
+            an += "x"
+
+        an += ascii_lowercase[move.to_x] + str(self.board.width - move.to_y)
+
+        if self.check:
+            if self.checkmate:
+                an += "#"
+            else:
+                an += "+"
+
+        self.an_moves.append(an)
+
     def move_piece(self, from_xy, to_xy):
         if from_xy in self.legal_moves and to_xy in self.legal_moves[from_xy]:
             if self.board.move_piece(from_xy, to_xy):
                 self.switch_color_to_move()
+                previous_legal_moves = self.legal_moves
                 self.generate_legal_moves()
+                self.store_move_an(self.board.moves[-1], previous_legal_moves)
                 self.dispatch_update()
                 return True
         return False
+
+    def move_piece_an(self, an):
+        """Apply a move described in algebraic notation."""
+        matches = re.search("([A-Z]?)([a-z]?)([0-9]?)x?([a-z][0-9])", an)
+        match_to = matches.group(4)
+
+        to_x = ascii_lowercase.index(match_to[0])
+        to_y = self.board.width - int(match_to[1])
+
+        to_xy = (to_x, to_y)
+
+        piece_name = matches.group(1) or "P"
+        from_x = matches.group(2)
+        from_y = matches.group(3)
+
+        for from_xy in self.legal_moves:
+            if self.board.get_piece(from_xy[0], from_xy[1]).name.upper() == piece_name:
+                for to_xy in self.legal_moves[from_xy]:
+                    if to_xy == (to_x, to_y):
+                        if not from_x and not from_y:
+                            from_x = from_xy[0]
+                            from_y = from_xy[1]
+                            break
+                        elif not from_x:
+                            if from_y == from_xy[1]:
+                                from_x = from_xy[0]
+                                break
+                        else:
+                            if from_x == from_xy[0]:
+                                from_y = from_xy[1]
+                                break
+
+        self.move_piece((from_x, from_y), (to_x, to_y))
 
     def undo_move(self):
         if self.board.undo_move():
             self.switch_color_to_move()
             self.generate_legal_moves()
+            self.an_moves.pop()
             self.dispatch_update()
             return True
         return False

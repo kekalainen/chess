@@ -11,4 +11,6 @@
 | 20.4. | 5     | Implemented basic move generation & validation. Added the rook piece. Added more tests. Drafted a class diagram.
 | 27.4. | 4     | Added the remaining pieces. Added an initial game class. Drafted a sequence diagram.
 | 30.4. | 6     | Added check, checkmate and stalemate detection. Updated tests.
-| **Total** | 32
+| 2.5.  | 2     | Initial work on algebraic notation.
+| 3.5.  | 4     | Finished work on storing and applying moves in AN. Added a move log to the UI. Added support for loading FEN strings.
+| **Total** | 38
