@@ -6,7 +6,7 @@ from game.pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
 class BoardFrame(tk.Frame):
-    def __init__(self, master=None, game=None, tile_width=100):
+    def __init__(self, master=None, game=None, tile_width=100, view_mode=False):
         super().__init__(master)
         self.master = master
         self.game = game
@@ -29,10 +29,11 @@ class BoardFrame(tk.Frame):
         self.load_piece_images()
         self.draw_board()
 
-        self.board_canvas.bind("<Button 1>", self.select_tile)
-        master.bind("<Escape>", self.deselect_tile)
-        master.bind("<Control-z>", self.undo_move)
-        master.bind("<Control-Z>", self.undo_move)
+        if not view_mode:
+            self.board_canvas.bind("<Button 1>", self.select_tile)
+            master.bind("<Escape>", self.deselect_tile)
+            master.bind("<Control-z>", self.undo_move)
+            master.bind("<Control-Z>", self.undo_move)
 
     def load_piece_images(self):
         self.piece_images = {}

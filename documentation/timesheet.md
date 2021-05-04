@@ -13,4 +13,5 @@
 | 30.4. | 6     | Added check, checkmate and stalemate detection. Updated tests.
 | 2.5.  | 2     | Initial work on algebraic notation.
 | 3.5.  | 4     | Finished work on storing and applying moves in AN. Added a move log to the UI. Added support for loading FEN strings.
-| **Total** | 38
+| 4.5.  | 3     | Implemented viewing past games and reading/writing PGN.
+| **Total** | 41
