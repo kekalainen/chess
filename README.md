@@ -13,8 +13,8 @@ A desktop application which can be used for playing chess, storing past games an
 [Timesheet](documentation/timesheet.md)
 
 ## Releases
-* [Week 6](/releases/tag/viikko6)
-* [Week 5](/releases/tag/viikko5)
+* [Week 6](../../releases/tag/viikko6)
+* [Week 5](../../releases/tag/viikko5)
 
 ## Installation
 
