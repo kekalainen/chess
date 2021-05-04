@@ -143,13 +143,11 @@ class Game:
 
     def move_piece_an(self, an):
         """Apply a move described in algebraic notation."""
-        matches = re.search("([A-Z]?)([a-z]?)([0-9]?)x?([a-z][0-9])", an)
+        matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])", an)
         match_to = matches.group(4)
 
         to_x = ascii_lowercase.index(match_to[0])
         to_y = self.board.width - int(match_to[1])
-
-        to_xy = (to_x, to_y)
 
         piece_name = matches.group(1) or "P"
         from_x = matches.group(2)
