@@ -5,6 +5,7 @@ Base = declarative_base()
 
 
 class Game(Base):
+    """An ORM model representing a game."""
     __tablename__ = "games"
 
     id = Column(Integer, primary_key=True)

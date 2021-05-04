@@ -3,15 +3,19 @@ from game.move import Move
 
 
 class Board:
+    """A class that represents a chess board."""
+
     def __init__(self):
         self.width = 8
         self.moves = []
         self.load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
     def clear_pieces(self):
+        """Removes all pieces from the board."""
         self.pieces = [[None] * self.width for i in range(self.width)]
 
     def set_piece(self, x, y, piece):
+        """Places a piece on the board."""
         if not isinstance(piece, Piece):
             return False
         self.pieces[x][y] = piece
@@ -49,9 +53,11 @@ class Board:
                     x += 1
 
     def is_in_bounds(self, x, y):
+        """Determines if supplied coordinates are within the boundaries of the board."""
         return x >= 0 and x < self.width and y >= 0 and y < self.width
 
     def get_piece(self, x, y):
+        """Returns a piece on the board."""
         if not self.is_in_bounds(x, y):
             return None
         return self.pieces[x][y]
@@ -106,6 +112,7 @@ class Board:
         return True
 
     def move_piece(self, from_xy, to_xy):
+        """Moves a piece if the move is legal, ignoring checks."""
         if not self.is_legal_move(from_xy, to_xy):
             return False
         piece = self.pieces[from_xy[0]][from_xy[1]]
@@ -117,6 +124,7 @@ class Board:
         return True
 
     def undo_move(self):
+        """Moves a piece back to its previous position and returns any captured piece to the board."""
         if len(self.moves) > 0:
             move = self.moves.pop()
             self.pieces[move.from_x][move.from_y] = move.piece

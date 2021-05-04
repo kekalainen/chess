@@ -5,7 +5,14 @@ from game.board import Board
 
 
 class Game:
+    """A class for handling game logic and state. Contains a board for keeping track of pieces."""
+
     def __init__(self, on_update):
+        """Initializes a game and creates a board.
+
+        Args:
+            on_update: A callback function that is invoked when the game state changes.
+        """
         self.white_to_move = True
         self.board = Board()
         if on_update:
@@ -14,7 +21,7 @@ class Game:
         self.an_moves = []
 
     def generate_all_moves(self, white_to_move):
-        """Generate all legal moves for the specified player, ignoring checks."""
+        """Generates all legal moves for the specified player, ignoring checks."""
 
         all_moves = {}
 
@@ -37,7 +44,7 @@ class Game:
         return all_moves
 
     def is_under_attack(self, xy):
-        """Determine if the opponent can move a piece to the given coordinates."""
+        """Determines if the opponent can move a piece to the given coordinates."""
         opponent_moves = self.generate_all_moves(not self.white_to_move)
         for from_xy in opponent_moves:
             for to_xy in opponent_moves[from_xy]:
@@ -46,12 +53,12 @@ class Game:
         return False
 
     def is_in_check(self):
-        """Determine if the current player's king is in check."""
+        """Determines if the current player's king is in check."""
         king_xy = self.board.get_king_coordinates(self.white_to_move)
         return self.is_under_attack(king_xy)
 
     def generate_legal_moves(self):
-        """Generate all legal moves for the current player."""
+        """Generates all legal moves for the current player."""
 
         all_moves = self.generate_all_moves(self.white_to_move)
         self.legal_moves = {}
@@ -81,10 +88,11 @@ class Game:
         return self.legal_moves[(x, y)] if (x, y) in self.legal_moves else []
 
     def switch_color_to_move(self):
+        """Switches the color to make the next move."""
         self.white_to_move = not self.white_to_move
 
     def store_move_an(self, move, previous_legal_moves):
-        """Store a move in algebraic notation."""
+        """Stores a move in algebraic notation."""
 
         an = move.piece.name.upper()
         if an == "P":
@@ -131,6 +139,7 @@ class Game:
         self.an_moves.append(an)
 
     def move_piece(self, from_xy, to_xy):
+        """Moves a piece and switches the color to move next if the move is legal."""
         if from_xy in self.legal_moves and to_xy in self.legal_moves[from_xy]:
             if self.board.move_piece(from_xy, to_xy):
                 self.switch_color_to_move()
@@ -142,7 +151,7 @@ class Game:
         return False
 
     def move_piece_an(self, an):
-        """Apply a move described in algebraic notation."""
+        """Applies a move described in algebraic notation."""
         matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])", an)
         match_to = matches.group(4)
 
@@ -173,6 +182,7 @@ class Game:
         self.move_piece((from_x, from_y), (to_x, to_y))
 
     def undo_move(self):
+        """Undoes the previous move and switches the color to move next if a previous move exists."""
         if self.board.undo_move():
             self.switch_color_to_move()
             self.generate_legal_moves()

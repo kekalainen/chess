@@ -1,4 +1,6 @@
 class Piece:
+    """A base class for classes representing chess pieces."""
+
     horizontal = True
     vertical = True
     diagonal = True
@@ -16,6 +18,7 @@ class Piece:
         return self.name.isupper()
 
     def moves(self):
+        """Returns the relative moves for the piece."""
         moves = []
         for x in range(-self.range, self.range + 1):
             for y in range(-self.range, self.range + 1):
@@ -28,7 +31,7 @@ class Piece:
         return moves
 
     def is_legal_move(self, from_xy, to_xy, occupant):
-        # Ensure the relative move is defined for this piece.
+        """Determines if the supplied relative move is defined for this piece."""
         return (to_xy[0] - from_xy[0], to_xy[1] - from_xy[1]) in self.moves()
 
 
