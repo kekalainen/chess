@@ -15,10 +15,13 @@ class Game:
         """
         self.white_to_move = True
         self.board = Board()
-        if on_update:
-            self.dispatch_update = on_update
+        self.on_update = on_update
         self.generate_legal_moves()
         self.an_moves = []
+
+    def dispatch_update(self):
+        if self.on_update:
+            self.on_update()
 
     def generate_all_moves(self, white_to_move):
         """Generates all legal moves for the specified player, ignoring checks."""
