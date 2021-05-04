@@ -1,6 +1,7 @@
 from os import path
 import tkinter as tk
 
+from db.init import db_session
 from .main import MainFrame
 
 
@@ -15,5 +16,5 @@ def bootstrap():
         ),
     )
 
-    main = MainFrame(master=root)
+    main = MainFrame(master=root, db_session=db_session)
     main.mainloop()

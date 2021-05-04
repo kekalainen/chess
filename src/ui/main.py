@@ -1,25 +1,27 @@
 import tkinter as tk
 import tkinter.messagebox
-from tkinter.ttk import Notebook
+from tkinter.ttk import Notebook, Combobox
 from tkinter.scrolledtext import ScrolledText
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 import os
 import re
 
 from .board import BoardFrame
 from game.game import Game
+from db.models import Game as GameModel
 
 
 class MainFrame(tk.Frame):
-    def __init__(self, master=None):
+    def __init__(self, master=None, db_session=None):
         super().__init__(master)
         self.master = master
+        self.db_session = db_session
 
         self.board_tile_width = 100
 
         x = self.master.winfo_screenwidth() // 2 - 150
         y = self.master.winfo_screenheight() // 2 - 50
-        self.master.geometry("%dx%d+%d+%d" % (300, 225, x, y))
+        self.master.geometry("%dx%d+%d+%d" % (300, 275, x, y))
         self.master.resizable(False, False)
 
         padx = 10
@@ -60,6 +62,12 @@ class MainFrame(tk.Frame):
         )
         self.next_move_btn.grid(row=0, column=1, padx=padx, pady=pady)
 
+        self.save_game_btn = tk.Button(
+            self.tabs_game, text="Save", command=self.db_save_game
+        )
+        self.save_game_btn.grid(row=3, column=0, padx=padx, pady=pady, sticky="NW")
+        self.save_game_btn.grid_remove()
+
         self.tabs_database = tk.Frame(self.tabs)
         self.tabs.add(self.tabs_database, text="Database")
 
@@ -67,10 +75,10 @@ class MainFrame(tk.Frame):
         self.pgn_label.grid(row=0, column=0, padx=padx, sticky="NW")
 
         self.pgn_text = ScrolledText(self.tabs_database, width=20, height=3)
-        self.pgn_text.grid(row=1, column=0, padx=padx, pady=pady)
+        self.pgn_text.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
 
         pgn_btn_frame = tk.Frame(self.tabs_database)
-        pgn_btn_frame.grid(row=2, column=0, padx=padx, pady=pady)
+        pgn_btn_frame.grid(row=2, column=0, pady=pady, sticky="NW")
 
         import_btn = tk.Button(pgn_btn_frame, text="Import", command=self.import_pgn)
         import_btn.grid(row=0, column=0, padx=padx, pady=pady)
@@ -82,6 +90,25 @@ class MainFrame(tk.Frame):
             pgn_btn_frame, text="View", command=lambda: self.start_game(view_mode=True)
         )
         view_btn.grid(row=0, column=2, padx=padx, pady=pady)
+
+        game_list_frame = tk.Frame(self.tabs_database)
+        game_list_frame.grid(row=4, column=0, pady=pady)
+
+        game_list_label = tk.Label(game_list_frame, text="Stored games")
+        game_list_label.grid(row=0, column=0, padx=padx, sticky="NW")
+
+        self.game_combobox = Combobox(game_list_frame, state="readonly")
+        self.game_combobox.grid(row=1, column=0, padx=padx, pady=pady)
+
+        load_btn = tk.Button(game_list_frame, text="Load", command=self.db_load_pgn)
+        load_btn.grid(row=1, column=1, padx=padx, pady=pady)
+
+        delete_btn = tk.Button(
+            game_list_frame, text="Delete", command=self.db_delete_game
+        )
+        delete_btn.grid(row=1, column=2, padx=padx, pady=pady)
+
+        self.db_load_games()
 
         self.tabs_settings = tk.Frame(self.tabs)
         self.tabs.add(self.tabs_settings, text="Settings")
@@ -125,6 +152,42 @@ class MainFrame(tk.Frame):
         if path:
             with open(path, "w") as f:
                 f.write(self.pgn_text.get(1.0, tk.END))
+
+    def db_save_game(self):
+        name = simpledialog.askstring(
+            "Save PGN", "Enter a name for the game.", parent=self
+        )
+        if name:
+            game = GameModel(name=name, pgn=self.moves_text.get(1.0, tk.END))
+            self.db_session.add(game)
+            self.db_session.commit()
+            self.db_load_games()
+
+    def db_load_games(self):
+        self.db_games = (
+            self.db_session.query(GameModel).order_by(GameModel.id.desc()).all()
+        )
+        names = []
+        for game in self.db_games:
+            names.append(game.name)
+        self.game_combobox.config(values=names)
+        if names:
+            self.game_combobox.set(names[0])
+        else:
+            self.game_combobox.set("")
+
+    def db_load_pgn(self):
+        if len(self.db_games) > 0:
+            game = self.db_games[self.game_combobox.current()]
+            self.pgn_text.delete(1.0, tk.END)
+            self.pgn_text.insert(1.0, game.pgn)
+
+    def db_delete_game(self):
+        if len(self.db_games) > 0:
+            game = self.db_games[self.game_combobox.current()]
+            self.db_session.delete(game)
+            self.db_session.commit()
+            self.db_load_games()
 
     def on_game_update(self):
         text = ""
@@ -178,6 +241,8 @@ class MainFrame(tk.Frame):
                 self.next_move_btn.configure(state=tk.NORMAL)
                 self.view_control_btn_frame.grid()
                 self.tabs.select(self.tabs_game)
+            else:
+                self.save_game_btn.grid()
 
             self.game = Game(self.on_game_update)
             self.board_dimension = self.game.board.width * self.board_tile_width
@@ -232,3 +297,4 @@ class MainFrame(tk.Frame):
         self.start_btn.grid()
         self.status_frame.grid_remove()
         self.view_control_btn_frame.grid_remove()
+        self.save_game_btn.grid_remove()
