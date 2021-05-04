@@ -28,6 +28,11 @@ class TestGame(unittest.TestCase):
         self.game.store_move_an(move, self.game.legal_moves)
         self.assertEqual(self.game.an_moves[-1], "e3")
 
+    def test_store_move_an_ambiguous_move(self):
+        for an in ["a4", "a5", "h4", "h5", "Ra3", "Ra6", "Rhh3"]:
+            self.game.move_piece_an(an)
+        self.assertEqual(self.game.an_moves[-1], "Rhh3")
+
     def test_move_piece_an_kings_pawn(self):
         self.assertIsNone(self.game.board.get_piece(4, 5))
         self.game.move_piece_an("e3")

@@ -101,7 +101,7 @@ class Game:
         if an == "P":
             an = ""
 
-        # Specify initial column, file or both for ambiguous moves.
+        # Specify initial file (column), rank (row) or both for ambiguous moves.
         ambiguous_moves = []
         for from_xy in previous_legal_moves:
             if (
@@ -125,7 +125,7 @@ class Game:
             else:
                 if ambiguous_x:
                     an += str(self.board.width - move.from_y)
-                if ambiguous_y:
+                else:
                     an += ascii_lowercase[move.from_x]
 
         if move.captured_piece:
@@ -163,7 +163,11 @@ class Game:
 
         piece_name = matches.group(1) or "P"
         from_x = matches.group(2)
+        if from_x:
+            from_x = ascii_lowercase.index(from_x)
         from_y = matches.group(3)
+        if from_y:
+            from_y = self.board.width - int(from_y)
 
         for from_xy in self.legal_moves:
             if self.board.get_piece(from_xy[0], from_xy[1]).name.upper() == piece_name:
