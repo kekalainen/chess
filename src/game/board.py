@@ -100,6 +100,8 @@ class Board:
                     and previous_move.to_y == from_xy[1]
                 ):
                     occupant = self.get_piece(to_xy[0], from_xy[1])
+                    if occupant.name.upper() != "P":
+                        occupant = None
 
         # Cannot capture own pieces.
         if occupant and piece.is_white() == occupant.is_white():
