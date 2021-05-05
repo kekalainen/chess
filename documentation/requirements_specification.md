@@ -20,7 +20,7 @@ The application consists of two windows which are shown simultaneously:
 ## Optional functionality
 If time allows, the following might be implemented:
 - An advanced rule set
-    - en passant
+    - en passant ✔️
     - promotion
     - castling
     - threefold repetition

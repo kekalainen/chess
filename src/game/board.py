@@ -21,6 +21,10 @@ class Board:
         self.pieces[x][y] = piece
         return True
 
+    def remove_piece(self, x, y):
+        """Removes a piece from the board."""
+        self.pieces[x][y] = None
+
     def load_fen(self, fen):
         """Load a board position described in Forsyth–Edwards Notation."""
         self.clear_pieces()
@@ -86,6 +90,17 @@ class Board:
 
         occupant = self.get_piece(to_xy[0], to_xy[1])
 
+        # Set the occupant for an en passant capture.
+        if piece.name.upper() == "P" and not occupant:
+            if self.moves:
+                previous_move = self.moves[-1]
+                if (
+                    abs(previous_move.from_y - previous_move.to_y) == 2
+                    and previous_move.to_x == to_xy[0]
+                    and previous_move.to_y == from_xy[1]
+                ):
+                    occupant = self.get_piece(to_xy[0], from_xy[1])
+
         # Cannot capture own pieces.
         if occupant and piece.is_white() == occupant.is_white():
             return False
@@ -115,11 +130,24 @@ class Board:
         """Moves a piece if the move is legal, ignoring checks."""
         if not self.is_legal_move(from_xy, to_xy):
             return False
-        piece = self.pieces[from_xy[0]][from_xy[1]]
-        captured_piece = self.pieces[to_xy[0]][to_xy[1]]
-        move = Move(piece, from_xy[0], from_xy[1], captured_piece, to_xy[0], to_xy[1])
-        self.pieces[move.from_x][move.from_y] = None
-        self.pieces[move.to_x][move.to_y] = piece
+        piece = self.get_piece(from_xy[0], from_xy[1])
+        captured_piece = self.get_piece(to_xy[0], to_xy[1])
+        en_passant = False
+        if piece.name.upper() == "P" and not captured_piece and from_xy[0] != to_xy[0]:
+            captured_piece = self.get_piece(to_xy[0], from_xy[1])
+            self.remove_piece(to_xy[0], from_xy[1])
+            en_passant = True
+        move = Move(
+            piece,
+            from_xy[0],
+            from_xy[1],
+            captured_piece,
+            en_passant,
+            to_xy[0],
+            to_xy[1],
+        )
+        self.remove_piece(move.from_x, move.from_y)
+        self.set_piece(move.to_x, move.to_y, piece)
         self.moves.append(move)
         return True
 
@@ -128,6 +156,11 @@ class Board:
         if len(self.moves) > 0:
             move = self.moves.pop()
             self.pieces[move.from_x][move.from_y] = move.piece
-            self.pieces[move.to_x][move.to_y] = move.captured_piece
+            self.remove_piece(move.to_x, move.to_y)
+            if move.captured_piece:
+                if move.en_passant:
+                    self.set_piece(move.to_x, move.from_y, move.captured_piece)
+                else:
+                    self.set_piece(move.to_x, move.to_y, move.captured_piece)
             return True
         return False
