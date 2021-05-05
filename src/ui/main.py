@@ -34,10 +34,10 @@ class MainFrame(tk.Frame):
         self.tabs.add(self.tabs_game, text="Game")
 
         self.start_btn = tk.Button(self.tabs_game, text="Play", command=self.start_game)
-        self.start_btn.grid(row=0, column=0, padx=padx, pady=pady)
+        self.start_btn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
 
         self.status_frame = tk.Frame(self.tabs_game)
-        self.status_frame.grid(row=1, column=0, padx=padx, pady=pady)
+        self.status_frame.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
         self.status_frame.grid_remove()
 
         self.status_label = tk.Label(self.status_frame, text="")
@@ -47,6 +47,29 @@ class MainFrame(tk.Frame):
             self.status_frame, width=20, height=3, state=tk.DISABLED
         )
         self.moves_text.grid(row=1, column=0, pady=pady)
+
+        self.promotion_piece = tk.StringVar(self, "Q")
+        self.promotion_piece_selection_frame = tk.Frame(self.tabs_game)
+        self.promotion_piece_selection_frame.grid(row=3, column=0, padx=padx, pady=pady)
+        self.promotion_piece_selection_frame.grid_remove()
+        promotion_label = tk.Label(
+            self.promotion_piece_selection_frame, text="Promotion piece"
+        )
+        promotion_label.grid(row=0, column=0, sticky="NW")
+        for promotion_piece in [
+            (0, "Knight", "N"),
+            (1, "Bishop", "B"),
+            (2, "Rook", "R"),
+            (3, "Queen", "Q"),
+        ]:
+            radio_btn = tk.Radiobutton(
+                self.promotion_piece_selection_frame,
+                variable=self.promotion_piece,
+                command=self.on_promotion_piece_selected,
+                text=promotion_piece[1],
+                val=promotion_piece[2],
+            )
+            radio_btn.grid(row=1, column=promotion_piece[0], pady=pady)
 
         self.view_control_btn_frame = tk.Frame(self.tabs_game)
         self.view_control_btn_frame.grid(row=3, column=0, padx=padx, pady=pady)
@@ -65,7 +88,7 @@ class MainFrame(tk.Frame):
         self.save_game_btn = tk.Button(
             self.tabs_game, text="Save", command=self.db_save_game
         )
-        self.save_game_btn.grid(row=3, column=0, padx=padx, pady=pady, sticky="NW")
+        self.save_game_btn.grid(row=4, column=0, padx=padx, pady=pady, sticky="NW")
         self.save_game_btn.grid_remove()
 
         self.tabs_database = tk.Frame(self.tabs)
@@ -227,11 +250,15 @@ class MainFrame(tk.Frame):
         self.moves_text.config(state=tk.DISABLED)
         self.moves_text.yview(tk.END)
 
+    def on_promotion_piece_selected(self):
+        if hasattr(self, "game"):
+            self.game.board.promotion_piece = self.promotion_piece.get()
+
     def start_game(self, view_mode=False):
         if not hasattr(self, "game"):
             if view_mode:
                 self.active_pgn = re.findall(
-                    "([a-zA-Z]+[0-9]?\w+)(?![^{]*})(?![^[]*])",
+                    "([a-zA-Z]+[0-9]?\w+=?[N|B|R|Q]?)(?![^{]*})(?![^[]*])",
                     self.pgn_text.get(1.0, tk.END),
                 )
                 if not self.active_pgn:
@@ -242,9 +269,11 @@ class MainFrame(tk.Frame):
                 self.view_control_btn_frame.grid()
                 self.tabs.select(self.tabs_game)
             else:
+                self.promotion_piece_selection_frame.grid()
                 self.save_game_btn.grid()
 
             self.game = Game(self.on_game_update)
+            self.game.board.promotion_piece = self.promotion_piece.get()
             self.board_dimension = self.game.board.width * self.board_tile_width
             self.board_window = tk.Toplevel(master=self)
             x = self.master.winfo_x() - self.board_dimension - 4
@@ -297,4 +326,5 @@ class MainFrame(tk.Frame):
         self.start_btn.grid()
         self.status_frame.grid_remove()
         self.view_control_btn_frame.grid_remove()
+        self.promotion_piece_selection_frame.grid_remove()
         self.save_game_btn.grid_remove()

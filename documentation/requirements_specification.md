@@ -21,7 +21,7 @@ The application consists of two windows which are shown simultaneously:
 If time allows, the following might be implemented:
 - An advanced rule set
     - en passant ✔️
-    - promotion
+    - promotion ✔️
     - castling
     - threefold repetition
     - fifty-move rule

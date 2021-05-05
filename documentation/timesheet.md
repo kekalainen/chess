@@ -14,5 +14,5 @@
 | 2.5.  | 2     | Initial work on algebraic notation.
 | 3.5.  | 4     | Finished work on storing and applying moves in AN. Added a move log to the UI. Added support for loading FEN strings.
 | 4.5.  | 8     | Implemented viewing past games and reading/writing PGN. Implemented saving and loading games to/from a local database. Wrote documentation. Added more tests. Fixed AN ambiguity issues.
-| 5.5.  | 2     | Implemented the en passant capture.
-| **Total** | 48
+| 5.5.  | 3     | Implemented the en passant capture and pawn promotion.
+| **Total** | 49

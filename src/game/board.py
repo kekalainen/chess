@@ -9,6 +9,7 @@ class Board:
         self.width = 8
         self.moves = []
         self.load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.promotion_piece = "Q"
 
     def clear_pieces(self):
         """Removes all pieces from the board."""
@@ -25,6 +26,25 @@ class Board:
         """Removes a piece from the board."""
         self.pieces[x][y] = None
 
+    def get_piece_by_name(self, name):
+        """Gets a chess piece by its abbreviation."""
+        white = name.isupper()
+        name = name.upper()
+        piece = None
+        if name == "P":
+            piece = Pawn(white, self.width)
+        elif name == "N":
+            piece = Knight(white, self.width)
+        elif name == "B":
+            piece = Bishop(white, self.width)
+        elif name == "R":
+            piece = Rook(white, self.width)
+        elif name == "Q":
+            piece = Queen(white, self.width)
+        elif name == "K":
+            piece = King(white, self.width)
+        return piece
+
     def load_fen(self, fen):
         """Load a board position described in Forsyth–Edwards Notation."""
         self.clear_pieces()
@@ -40,19 +60,7 @@ class Board:
                 elif char == " ":
                     break
                 else:
-                    piece_name = char.upper()
-                    if piece_name == "P":
-                        piece = Pawn(char.isupper(), self.width)
-                    elif piece_name == "N":
-                        piece = Knight(char.isupper(), self.width)
-                    elif piece_name == "B":
-                        piece = Bishop(char.isupper(), self.width)
-                    elif piece_name == "R":
-                        piece = Rook(char.isupper(), self.width)
-                    elif piece_name == "Q":
-                        piece = Queen(char.isupper(), self.width)
-                    elif piece_name == "K":
-                        piece = King(char.isupper(), self.width)
+                    piece = self.get_piece_by_name(char)
                     self.set_piece(x, y, piece)
                     x += 1
 
@@ -135,10 +143,15 @@ class Board:
         piece = self.get_piece(from_xy[0], from_xy[1])
         captured_piece = self.get_piece(to_xy[0], to_xy[1])
         en_passant = False
-        if piece.name.upper() == "P" and not captured_piece and from_xy[0] != to_xy[0]:
-            captured_piece = self.get_piece(to_xy[0], from_xy[1])
-            self.remove_piece(to_xy[0], from_xy[1])
-            en_passant = True
+        promoted_to_piece = None
+        if piece.name.upper() == "P":
+            if not captured_piece and from_xy[0] != to_xy[0]:
+                captured_piece = self.get_piece(to_xy[0], from_xy[1])
+                self.remove_piece(to_xy[0], from_xy[1])
+                en_passant = True
+            elif to_xy[1] == 0 or to_xy[1] == self.width - 1:
+                promoted_to_piece = self.get_piece_by_name(self.promotion_piece if piece.is_white() else self.promotion_piece.lower())
+
         move = Move(
             piece,
             from_xy[0],
@@ -147,8 +160,11 @@ class Board:
             en_passant,
             to_xy[0],
             to_xy[1],
+            promoted_to_piece,
         )
         self.remove_piece(move.from_x, move.from_y)
+        if promoted_to_piece:
+            piece = promoted_to_piece
         self.set_piece(move.to_x, move.to_y, piece)
         self.moves.append(move)
         return True

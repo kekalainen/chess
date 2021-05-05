@@ -133,6 +133,9 @@ class Game:
 
         an += ascii_lowercase[move.to_x] + str(self.board.width - move.to_y)
 
+        if move.promoted_to_piece:
+            an += "=" + move.promoted_to_piece.name.upper()
+
         if self.check:
             if self.checkmate:
                 an += "#"
@@ -155,7 +158,7 @@ class Game:
 
     def move_piece_an(self, an):
         """Applies a move described in algebraic notation."""
-        matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])", an)
+        matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])\S?([N|B|R|Q])?", an)
         match_to = matches.group(4)
 
         to_x = ascii_lowercase.index(match_to[0])
@@ -185,6 +188,10 @@ class Game:
                             if from_x == from_xy[0]:
                                 from_y = from_xy[1]
                                 break
+
+        promoted_to_piece_name = matches.group(5)
+        if promoted_to_piece_name:
+            self.board.promotion_piece = promoted_to_piece_name
 
         self.move_piece((from_x, from_y), (to_x, to_y))
 
