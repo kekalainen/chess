@@ -50,7 +50,8 @@ class Board:
         self.clear_pieces()
         self.fen = fen
         x = y = 0
-        for char in fen:
+        fen = fen.split(" ")
+        for char in fen[0]:
             if char.isnumeric():
                 x += int(char)
             else:
@@ -63,6 +64,11 @@ class Board:
                     piece = self.get_piece_by_name(char)
                     self.set_piece(x, y, piece)
                     x += 1
+        self.castling_rights = [[False, False], [False, False]]
+        for char in fen[2]:
+            if char == "-":
+                break
+            self.grant_castling_right(char.isupper(), char.upper() == "K")
 
     def is_in_bounds(self, x, y):
         """Determines if supplied coordinates are within the boundaries of the board."""
@@ -81,6 +87,36 @@ class Board:
                 piece = self.get_piece(x, y)
                 if piece and piece.is_white() == white and piece.name.upper() == "K":
                     return (x, y)
+
+    def has_castling_right(self, white, kingside):
+        """Returns whether the specified color has the right to castle on the specified side."""
+        return self.castling_rights[white][kingside]
+
+    def grant_castling_right(self, white, kingside):
+        """Grants the castling right to the specified color and side."""
+        if not self.has_castling_right(white, kingside):
+            self.castling_rights[white][kingside] = True
+            return True
+        return False
+
+    def revoke_castling_right(self, white, kingside):
+        """Revokes the castling right from the specified color and side."""
+        if self.has_castling_right(white, kingside):
+            self.castling_rights[white][kingside] = False
+            return True
+        return False
+
+    def contains_rook_in_initial_position(self, x, y):
+        """Checks if there's a rook piece in its initial position at the specified coordinates."""
+        piece = self.get_piece(x, y)
+        if not piece:
+            return False
+        return (
+            piece.is_white()
+            and (x, y) in [(0, self.width - 1), (self.width - 1, self.width - 1)]
+            or not piece.is_white()
+            and (x, y) in [(0, 0), (self.width - 1, 0)]
+        )
 
     def is_legal_move(self, from_xy, to_xy):
         """Determines if a move is legal, ignoring checks."""
@@ -110,6 +146,20 @@ class Board:
                     occupant = self.get_piece(to_xy[0], from_xy[1])
                     if occupant.name.upper() != "P":
                         occupant = None
+        # Check castling rules.
+        elif piece.name.upper() == "K":
+            delta_x = to_xy[0] - from_xy[0]
+            if abs(delta_x) == 2:
+                kingside = delta_x > 0
+                if not self.has_castling_right(piece.is_white(), kingside):
+                    return False
+                # Ensure there are no pieces between the king and the rook.
+                for x in range(
+                    from_xy[0] + 1 if kingside else 1,
+                    self.width - 1 if kingside else from_xy[0] - 1,
+                ):
+                    if self.get_piece(x, to_xy[1]):
+                        return False
 
         # Cannot capture own pieces.
         if occupant and piece.is_white() == occupant.is_white():
@@ -140,10 +190,14 @@ class Board:
         """Moves a piece if the move is legal, ignoring checks."""
         if not self.is_legal_move(from_xy, to_xy):
             return False
+
         piece = self.get_piece(from_xy[0], from_xy[1])
         captured_piece = self.get_piece(to_xy[0], to_xy[1])
+
         en_passant = False
         promoted_to_piece = None
+        castling_rights_revoked = []
+        castling_side = 0
         if piece.name.upper() == "P":
             if not captured_piece and from_xy[0] != to_xy[0]:
                 captured_piece = self.get_piece(to_xy[0], from_xy[1])
@@ -151,6 +205,25 @@ class Board:
                 en_passant = True
             elif to_xy[1] == 0 or to_xy[1] == self.width - 1:
                 promoted_to_piece = self.get_piece_by_name(self.promotion_piece if piece.is_white() else self.promotion_piece.lower())
+        elif piece.name.upper() == "K":
+            delta_x = to_xy[0] - from_xy[0]
+            if abs(delta_x) == 2:
+                castling_side = delta_x
+            for side in [False, True]:
+                if self.revoke_castling_right(piece.is_white(), side):
+                    castling_rights_revoked.append((piece.is_white(), side))
+        elif piece.name.upper() == "R":
+            if self.contains_rook_in_initial_position(from_xy[0], from_xy[1]):
+                if self.revoke_castling_right(piece.is_white(), from_xy[0] != 0):
+                    castling_rights_revoked.append((piece.is_white(), from_xy[0] != 0))
+
+        # Revoke castling rights from captured rooks in case of promotion.
+        if captured_piece and captured_piece.name.upper() == "R":
+            if self.contains_rook_in_initial_position(to_xy[0], to_xy[1]):
+                if self.revoke_castling_right(captured_piece.is_white(), to_xy[0] != 0):
+                    castling_rights_revoked.append(
+                        (captured_piece.is_white(), to_xy[0] != 0)
+                    )
 
         move = Move(
             piece,
@@ -161,11 +234,22 @@ class Board:
             to_xy[0],
             to_xy[1],
             promoted_to_piece,
+            castling_side,
+            castling_rights_revoked,
         )
+
         self.remove_piece(move.from_x, move.from_y)
+
         if promoted_to_piece:
             piece = promoted_to_piece
         self.set_piece(move.to_x, move.to_y, piece)
+
+        if castling_side:
+            rook_x = self.width - 1 if castling_side > 0 else 0
+            rook = self.get_piece(rook_x, to_xy[1])
+            self.remove_piece(rook_x, to_xy[1])
+            self.set_piece(to_xy[0] + (-1 if castling_side > 0 else 1), to_xy[1], rook)
+
         self.moves.append(move)
         return True
 
@@ -180,5 +264,14 @@ class Board:
                     self.set_piece(move.to_x, move.from_y, move.captured_piece)
                 else:
                     self.set_piece(move.to_x, move.to_y, move.captured_piece)
+            elif move.castling_side:
+                rook_x = move.to_x + (-1 if move.castling_side > 0 else 1)
+                rook = self.get_piece(rook_x, move.to_y)
+                self.remove_piece(rook_x, move.to_y)
+                self.set_piece(
+                    self.width - 1 if move.castling_side > 0 else 0, move.from_y, rook
+                )
+            for right in move.castling_rights_revoked:
+                self.grant_castling_right(right[0], right[1])
             return True
         return False

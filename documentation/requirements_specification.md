@@ -22,7 +22,7 @@ If time allows, the following might be implemented:
 - An advanced rule set
     - en passant ✔️
     - promotion ✔️
-    - castling
+    - castling ✔️
     - threefold repetition
     - fifty-move rule
 - A simple AI opponent

@@ -96,3 +96,6 @@ class Queen(Piece):
 
 class King(Piece):
     name = "K"
+
+    def moves(self):
+        return Piece.moves(self) + [(-2, 0), (2, 0)]

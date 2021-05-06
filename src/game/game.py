@@ -63,6 +63,8 @@ class Game:
     def generate_legal_moves(self):
         """Generates all legal moves for the current player."""
 
+        self.check = self.is_in_check()
+
         all_moves = self.generate_all_moves(self.white_to_move)
         self.legal_moves = {}
         for from_xy in all_moves:
@@ -70,12 +72,22 @@ class Game:
             for to_xy in all_moves[from_xy]:
                 self.board.move_piece(from_xy, to_xy)
                 if not self.is_in_check():
-                    self.legal_moves[from_xy].append(to_xy)
+                    # Prevent castling out of or through check.
+                    delta_x = to_xy[0] - from_xy[0]
+                    if not (
+                        abs(delta_x) == 2
+                        and self.board.get_piece(to_xy[0], to_xy[1]).name.upper() == "K"
+                        and (
+                            self.check
+                            or self.is_under_attack(
+                                (from_xy[0] + (1 if delta_x > 0 else -1), to_xy[1])
+                            )
+                        )
+                    ):
+                        self.legal_moves[from_xy].append(to_xy)
                 self.board.undo_move()
             if not self.legal_moves[from_xy]:
                 del self.legal_moves[from_xy]
-
-        self.check = self.is_in_check()
 
         if len(self.legal_moves) == 0:
             if self.check:
@@ -106,7 +118,8 @@ class Game:
         for from_xy in previous_legal_moves:
             if (
                 from_xy != (move.from_x, move.from_y)
-                and self.board.get_piece(from_xy[0], from_xy[1]).name == move.piece.name
+                and getattr(self.board.get_piece(from_xy[0], from_xy[1]), "name", "")
+                == move.piece.name
             ):
                 for to_xy in previous_legal_moves[from_xy]:
                     if to_xy == (move.to_x, move.to_y):
@@ -136,6 +149,11 @@ class Game:
         if move.promoted_to_piece:
             an += "=" + move.promoted_to_piece.name.upper()
 
+        if move.castling_side:
+            an = "O-O"
+            if move.castling_side < 0:
+                an += "-O"
+
         if self.check:
             if self.checkmate:
                 an += "#"
@@ -159,39 +177,47 @@ class Game:
     def move_piece_an(self, an):
         """Applies a move described in algebraic notation."""
         matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])\S?([N|B|R|Q])?", an)
-        match_to = matches.group(4)
+        if matches:
+            match_to = matches.group(4)
 
-        to_x = ascii_lowercase.index(match_to[0])
-        to_y = self.board.width - int(match_to[1])
+            to_x = ascii_lowercase.index(match_to[0])
+            to_y = self.board.width - int(match_to[1])
 
-        piece_name = matches.group(1) or "P"
-        from_x = matches.group(2)
-        if from_x:
-            from_x = ascii_lowercase.index(from_x)
-        from_y = matches.group(3)
-        if from_y:
-            from_y = self.board.width - int(from_y)
+            piece_name = matches.group(1) or "P"
+            from_x = matches.group(2)
+            if from_x:
+                from_x = ascii_lowercase.index(from_x)
+            from_y = matches.group(3)
+            if from_y:
+                from_y = self.board.width - int(from_y)
 
-        for from_xy in self.legal_moves:
-            if self.board.get_piece(from_xy[0], from_xy[1]).name.upper() == piece_name:
-                for to_xy in self.legal_moves[from_xy]:
-                    if to_xy == (to_x, to_y):
-                        if not from_x and not from_y:
-                            from_x = from_xy[0]
-                            from_y = from_xy[1]
-                            break
-                        elif not from_x:
-                            if from_y == from_xy[1]:
+            for from_xy in self.legal_moves:
+                if self.board.get_piece(from_xy[0], from_xy[1]).name.upper() == piece_name:
+                    for to_xy in self.legal_moves[from_xy]:
+                        if to_xy == (to_x, to_y):
+                            if not from_x and not from_y:
                                 from_x = from_xy[0]
-                                break
-                        else:
-                            if from_x == from_xy[0]:
                                 from_y = from_xy[1]
                                 break
+                            elif not from_x:
+                                if from_y == from_xy[1]:
+                                    from_x = from_xy[0]
+                                    break
+                            else:
+                                if from_x == from_xy[0]:
+                                    from_y = from_xy[1]
+                                    break
 
-        promoted_to_piece_name = matches.group(5)
-        if promoted_to_piece_name:
-            self.board.promotion_piece = promoted_to_piece_name
+            promoted_to_piece_name = matches.group(5)
+            if promoted_to_piece_name:
+                self.board.promotion_piece = promoted_to_piece_name
+        else:
+            to_y = from_y = self.board.width - 1 if self.white_to_move else 0
+            from_x = self.board.get_king_coordinates(self.white_to_move)[0]
+            if an == "O-O" or an == "0-0":
+                to_x = self.board.width - 2
+            elif an == "O-O-O" or an == "0-0-0":
+                to_x = 2
 
         self.move_piece((from_x, from_y), (to_x, to_y))
 

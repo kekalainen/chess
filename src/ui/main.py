@@ -258,7 +258,7 @@ class MainFrame(tk.Frame):
         if not hasattr(self, "game"):
             if view_mode:
                 self.active_pgn = re.findall(
-                    "([a-zA-Z]+[0-9]?\w+=?[N|B|R|Q]?)(?![^{]*})(?![^[]*])",
+                    "((?!-)[a-zA-Z0-]+[0-9]?\w+=?[N|B|R|Q]?)(?![^{]*})(?![^[]*])",
                     self.pgn_text.get(1.0, tk.END),
                 )
                 if not self.active_pgn:
