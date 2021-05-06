@@ -14,6 +14,9 @@ class Piece:
         if self.range == float("inf"):
             self.range = self.board_width
 
+    def __str__(self):
+        return self.name
+
     def is_white(self):
         return self.name.isupper()
 

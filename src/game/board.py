@@ -70,6 +70,16 @@ class Board:
                 break
             self.grant_castling_right(char.isupper(), char.upper() == "K")
 
+        self.en_passant_target_xy = [None]
+
+    def get_position_hash(self):
+        """Returns a hash for the board's position, castling rights and en passant target."""
+        return hash(
+            "".join(["".join(str(piece) for piece in col) for col in self.pieces])
+            + str(self.castling_rights)
+            + str(self.en_passant_target_xy[-1])
+        )
+
     def is_in_bounds(self, x, y):
         """Determines if supplied coordinates are within the boundaries of the board."""
         return x >= 0 and x < self.width and y >= 0 and y < self.width
@@ -142,8 +152,10 @@ class Board:
                     abs(previous_move.from_y - previous_move.to_y) == 2
                     and previous_move.to_x == to_xy[0]
                     and previous_move.to_y == from_xy[1]
+                    and from_xy != (to_xy[0], from_xy[1])
                 ):
                     occupant = self.get_piece(to_xy[0], from_xy[1])
+                    self.en_passant_target_xy[-1] = (to_xy[0], from_xy[1])
                     if occupant.name.upper() != "P":
                         occupant = None
         # Check castling rules.
@@ -240,6 +252,8 @@ class Board:
 
         self.remove_piece(move.from_x, move.from_y)
 
+        self.en_passant_target_xy.append(None)
+
         if promoted_to_piece:
             piece = promoted_to_piece
         self.set_piece(move.to_x, move.to_y, piece)
@@ -271,6 +285,7 @@ class Board:
                 self.set_piece(
                     self.width - 1 if move.castling_side > 0 else 0, move.from_y, rook
                 )
+            self.en_passant_target_xy.pop()
             for right in move.castling_rights_revoked:
                 self.grant_castling_right(right[0], right[1])
             return True

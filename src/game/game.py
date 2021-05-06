@@ -18,6 +18,11 @@ class Game:
         self.on_update = on_update
         self.generate_legal_moves()
         self.an_moves = []
+        self.draw = False
+        self.can_claim_draw = [False, False]
+        self.position_occurrences = {}
+        self.store_position_occurrence()
+        self.halfmove_clock = [0]
 
     def dispatch_update(self):
         if self.on_update:
@@ -100,7 +105,11 @@ class Game:
 
     def get_legal_moves(self, x, y):
         """Gets legal moves for the piece (if any) on the given coordinates."""
-        return self.legal_moves[(x, y)] if (x, y) in self.legal_moves else []
+        return (
+            self.legal_moves[(x, y)]
+            if (x, y) in self.legal_moves and not self.draw
+            else []
+        )
 
     def switch_color_to_move(self):
         """Switches the color to make the next move."""
@@ -162,14 +171,36 @@ class Game:
 
         self.an_moves.append(an)
 
+    def store_position_occurrence(self):
+        """Stores the board position and parts of the game status for the threefold repetition rule."""
+        if not self.can_claim_draw[0]:
+            position_hash = self.board.get_position_hash()
+            if not position_hash in self.position_occurrences:
+                self.position_occurrences[position_hash] = 1
+            else:
+                self.position_occurrences[position_hash] += 1
+                if self.position_occurrences[position_hash] == 3:
+                    self.can_claim_draw[0] = True
+
     def move_piece(self, from_xy, to_xy):
         """Moves a piece and switches the color to move next if the move is legal."""
         if from_xy in self.legal_moves and to_xy in self.legal_moves[from_xy]:
+            reset_halfmove_clock = getattr(
+                self.board.get_piece(from_xy[0], from_xy[1]), "name", ""
+            ).upper() == "P" or self.board.get_piece(to_xy[0], to_xy[1])
             if self.board.move_piece(from_xy, to_xy):
                 self.switch_color_to_move()
                 previous_legal_moves = self.legal_moves
                 self.generate_legal_moves()
                 self.store_move_an(self.board.moves[-1], previous_legal_moves)
+                self.store_position_occurrence()
+                if reset_halfmove_clock or not self.legal_moves:
+                    self.halfmove_clock.append(0)
+                    self.can_claim_draw[1] = False
+                else:
+                    self.halfmove_clock.append(self.halfmove_clock[-1] + 1)
+                    if self.halfmove_clock[-1] // 2 == 50:
+                        self.can_claim_draw[1] = True
                 self.dispatch_update()
                 return True
         return False
@@ -223,10 +254,27 @@ class Game:
 
     def undo_move(self):
         """Undoes the previous move and switches the color to move next if a previous move exists."""
+        position_hash = self.board.get_position_hash()
         if self.board.undo_move():
             self.switch_color_to_move()
             self.generate_legal_moves()
             self.an_moves.pop()
+            self.draw = False
+            if position_hash in self.position_occurrences:
+                if self.position_occurrences[position_hash] == 3:
+                    self.can_claim_draw[0] = False
+                self.position_occurrences[position_hash] -= 1
+            self.halfmove_clock.pop()
+            self.can_claim_draw[1] = False
+            if self.halfmove_clock[-1] // 2 >= 50:
+                self.can_claim_draw[1] = True
+            self.dispatch_update()
+            return True
+        return False
+
+    def claim_draw(self):
+        if True in self.can_claim_draw:
+            self.draw = True
             self.dispatch_update()
             return True
         return False

@@ -23,6 +23,6 @@ If time allows, the following might be implemented:
     - en passant ✔️
     - promotion ✔️
     - castling ✔️
-    - threefold repetition
-    - fifty-move rule
+    - threefold repetition ✔️
+    - fifty-move rule ✔️
 - A simple AI opponent

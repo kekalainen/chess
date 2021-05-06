@@ -43,6 +43,12 @@ class MainFrame(tk.Frame):
         self.status_label = tk.Label(self.status_frame, text="")
         self.status_label.grid(row=0, column=0, pady=pady, sticky="NW")
 
+        self.draw_btn = tk.Button(
+            self.status_frame, text="Claim draw", command=self.claim_draw
+        )
+        self.draw_btn.grid(row=0, column=1, padx=padx, pady=pady, sticky="NE")
+        self.draw_btn.grid_remove()
+
         self.moves_text = ScrolledText(
             self.status_frame, width=20, height=3, state=tk.DISABLED
         )
@@ -231,6 +237,8 @@ class MainFrame(tk.Frame):
                 text += " Black wins."
         elif self.game.stalemate:
             text = "Stalemate. Draw."
+        elif self.game.draw:
+            text = "Draw."
 
         self.status_label["text"] = text
 
@@ -249,6 +257,11 @@ class MainFrame(tk.Frame):
         self.moves_text.insert(1.0, move_log)
         self.moves_text.config(state=tk.DISABLED)
         self.moves_text.yview(tk.END)
+
+        if not self.game.draw and True in self.game.can_claim_draw:
+            self.draw_btn.grid()
+        else:
+            self.draw_btn.grid_remove()
 
     def on_promotion_piece_selected(self):
         if hasattr(self, "game"):
@@ -295,6 +308,12 @@ class MainFrame(tk.Frame):
             self.status_frame.grid()
             self.on_game_update()
 
+    def claim_draw(self):
+        if hasattr(self, "game"):
+            if self.game.claim_draw():
+                self.board_frame.deselect_tile()
+                self.draw_btn.grid_remove()
+
     def next_move(self):
         n = len(self.active_pgn)
         if self.active_pgn_index < n:
@@ -328,3 +347,4 @@ class MainFrame(tk.Frame):
         self.view_control_btn_frame.grid_remove()
         self.promotion_piece_selection_frame.grid_remove()
         self.save_game_btn.grid_remove()
+        self.draw_btn.grid_remove()

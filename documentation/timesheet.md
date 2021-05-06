@@ -15,5 +15,5 @@
 | 3.5.  | 4     | Finished work on storing and applying moves in AN. Added a move log to the UI. Added support for loading FEN strings.
 | 4.5.  | 8     | Implemented viewing past games and reading/writing PGN. Implemented saving and loading games to/from a local database. Wrote documentation. Added more tests. Fixed AN ambiguity issues.
 | 5.5.  | 4     | Implemented the en passant capture and pawn promotion. Initial work on castling implementation.
-| 6.5.  | 5     | Finished work on castling.
-| **Total** | 55
+| 6.5.  | 9     | Finished work on castling. Implemented threefold repetition and fifty-move rule.
+| **Total** | 59
