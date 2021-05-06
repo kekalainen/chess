@@ -110,11 +110,12 @@ class BoardFrame(tk.Frame):
         y = event.y // self.tile_width
         tile = (x, y)
         if not self.selected_tile:
-            legal_moves = self.game.get_legal_moves(x, y)
-            if legal_moves:
-                self.selected_tile = tile
-                self.legal_tiles = legal_moves
-                self.draw_board()
+            if not hasattr(self.game, "ai") or self.game.white_to_move:
+                legal_moves = self.game.get_legal_moves(x, y)
+                if legal_moves:
+                    self.selected_tile = tile
+                    self.legal_tiles = legal_moves
+                    self.draw_board()
         else:
             self.game.move_piece((self.selected_tile[0], self.selected_tile[1]), (x, y))
             self.deselect_tile()

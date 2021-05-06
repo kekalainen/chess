@@ -19,10 +19,10 @@ The application consists of two windows which are shown simultaneously:
 
 ## Optional functionality
 If time allows, the following might be implemented:
-- An advanced rule set
+- An advanced rule set ✔️
     - en passant ✔️
     - promotion ✔️
     - castling ✔️
     - threefold repetition ✔️
     - fifty-move rule ✔️
-- A simple AI opponent
+- A simple AI opponent ✔️

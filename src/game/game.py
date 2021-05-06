@@ -1,13 +1,15 @@
 from string import ascii_lowercase
 import re
+import threading
 
+from game.ai import AI
 from game.board import Board
 
 
 class Game:
     """A class for handling game logic and state. Contains a board for keeping track of pieces."""
 
-    def __init__(self, on_update):
+    def __init__(self, on_update, ai_difficulty=-1):
         """Initializes a game and creates a board.
 
         Args:
@@ -23,6 +25,8 @@ class Game:
         self.position_occurrences = {}
         self.store_position_occurrence()
         self.halfmove_clock = [0]
+        if ai_difficulty != -1:
+            self.ai = AI(game=self, difficulty=ai_difficulty)
 
     def dispatch_update(self):
         if self.on_update:
@@ -202,8 +206,16 @@ class Game:
                     if self.halfmove_clock[-1] // 2 == 50:
                         self.can_claim_draw[1] = True
                 self.dispatch_update()
+                if hasattr(self, "ai") and not self.white_to_move:
+                    threading.Thread(target=self.move_piece_ai_thread_target).start()
                 return True
         return False
+
+    def move_piece_ai_thread_target(self):
+        """Requests and applies a move from the AI."""
+        ai_move = self.ai.choose_move()
+        if ai_move:
+            self.move_piece(ai_move[0], ai_move[1])
 
     def move_piece_an(self, an):
         """Applies a move described in algebraic notation."""
@@ -271,7 +283,10 @@ class Game:
             self.can_claim_draw[1] = False
             if self.halfmove_clock[-1] // 2 >= 50:
                 self.can_claim_draw[1] = True
-            self.dispatch_update()
+            if hasattr(self, "ai") and not self.white_to_move:
+                self.undo_move()
+            else:
+                self.dispatch_update()
             return True
         return False
 

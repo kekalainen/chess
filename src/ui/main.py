@@ -33,8 +33,21 @@ class MainFrame(tk.Frame):
         self.tabs_game = tk.Frame(self.tabs)
         self.tabs.add(self.tabs_game, text="Game")
 
-        self.start_btn = tk.Button(self.tabs_game, text="Play", command=self.start_game)
+        self.start_frame = tk.Frame(self.tabs_game)
+        self.start_frame.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
+        self.start_btn = tk.Button(
+            self.start_frame, text="Play", command=self.start_game
+        )
         self.start_btn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
+        self.ai_difficulty = tk.IntVar(self, -1)
+        for ai_difficulty in [(0, "2 players", -1), (1, "Random AI", 0)]:
+            radio_btn = tk.Radiobutton(
+                self.start_frame,
+                variable=self.ai_difficulty,
+                text=ai_difficulty[1],
+                val=ai_difficulty[2],
+            )
+            radio_btn.grid(row=0, column=ai_difficulty[0] + 1, pady=pady, sticky="NW")
 
         self.status_frame = tk.Frame(self.tabs_game)
         self.status_frame.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
@@ -263,6 +276,9 @@ class MainFrame(tk.Frame):
         else:
             self.draw_btn.grid_remove()
 
+        if hasattr(self.game, "ai") and self.game.white_to_move:
+            self.board_frame.draw_pieces()
+
     def on_promotion_piece_selected(self):
         if hasattr(self, "game"):
             self.game.board.promotion_piece = self.promotion_piece.get()
@@ -285,7 +301,10 @@ class MainFrame(tk.Frame):
                 self.promotion_piece_selection_frame.grid()
                 self.save_game_btn.grid()
 
-            self.game = Game(self.on_game_update)
+            self.game = Game(
+                on_update=self.on_game_update,
+                ai_difficulty=self.ai_difficulty.get() if not view_mode else -1,
+            )
             self.game.board.promotion_piece = self.promotion_piece.get()
             self.board_dimension = self.game.board.width * self.board_tile_width
             self.board_window = tk.Toplevel(master=self)
@@ -304,7 +323,7 @@ class MainFrame(tk.Frame):
             self.master.bind("<Configure>", self.board_window_follow)
             self.board_window.protocol("WM_DELETE_WINDOW", self.on_board_window_close)
 
-            self.start_btn.grid_remove()
+            self.start_frame.grid_remove()
             self.status_frame.grid()
             self.on_game_update()
 
@@ -342,7 +361,7 @@ class MainFrame(tk.Frame):
         delattr(self, "game")
         self.master.unbind("<Configure>")
         self.board_window.destroy()
-        self.start_btn.grid()
+        self.start_frame.grid()
         self.status_frame.grid_remove()
         self.view_control_btn_frame.grid_remove()
         self.promotion_piece_selection_frame.grid_remove()
