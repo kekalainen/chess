@@ -216,7 +216,11 @@ class Board:
                 self.remove_piece(to_xy[0], from_xy[1])
                 en_passant = True
             elif to_xy[1] == 0 or to_xy[1] == self.width - 1:
-                promoted_to_piece = self.get_piece_by_name(self.promotion_piece if piece.is_white() else self.promotion_piece.lower())
+                promoted_to_piece = self.get_piece_by_name(
+                    self.promotion_piece
+                    if piece.is_white()
+                    else self.promotion_piece.lower()
+                )
         elif piece.name.upper() == "K":
             delta_x = to_xy[0] - from_xy[0]
             if abs(delta_x) == 2:

@@ -223,7 +223,10 @@ class Game:
                 from_y = self.board.width - int(from_y)
 
             for from_xy in self.legal_moves:
-                if self.board.get_piece(from_xy[0], from_xy[1]).name.upper() == piece_name:
+                if (
+                    self.board.get_piece(from_xy[0], from_xy[1]).name.upper()
+                    == piece_name
+                ):
                     for to_xy in self.legal_moves[from_xy]:
                         if to_xy == (to_x, to_y):
                             if not from_x and not from_y:
