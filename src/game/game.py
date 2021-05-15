@@ -46,7 +46,7 @@ class Game:
 
                 piece_moves = piece.moves()
                 from_xy = (x, y)
-                if not from_xy in all_moves:
+                if from_xy not in all_moves:
                     all_moves[from_xy] = []
                 for move in piece_moves:
                     to_xy = (move[0] + x, move[1] + y)
@@ -122,9 +122,9 @@ class Game:
     def store_move_an(self, move, previous_legal_moves):
         """Stores a move in algebraic notation."""
 
-        an = move.piece.name.upper()
-        if an == "P":
-            an = ""
+        an_move = move.piece.name.upper()
+        if an_move == "P":
+            an_move = ""
 
         # Specify initial file (column), rank (row) or both for ambiguous moves.
         ambiguous_moves = []
@@ -147,33 +147,33 @@ class Game:
                     ambiguous_y = True
 
             if ambiguous_x and ambiguous_y:
-                an += ascii_lowercase[move.from_x] + str(self.board.width - move.from_y)
+                an_move += ascii_lowercase[move.from_x] + str(self.board.width - move.from_y)
             else:
                 if ambiguous_x:
-                    an += str(self.board.width - move.from_y)
+                    an_move += str(self.board.width - move.from_y)
                 else:
-                    an += ascii_lowercase[move.from_x]
+                    an_move += ascii_lowercase[move.from_x]
 
         if move.captured_piece:
-            an += "x"
+            an_move += "x"
 
-        an += ascii_lowercase[move.to_x] + str(self.board.width - move.to_y)
+        an_move += ascii_lowercase[move.to_x] + str(self.board.width - move.to_y)
 
         if move.promoted_to_piece:
-            an += "=" + move.promoted_to_piece.name.upper()
+            an_move += "=" + move.promoted_to_piece.name.upper()
 
         if move.castling_side:
-            an = "O-O"
+            an_move = "O-O"
             if move.castling_side < 0:
-                an += "-O"
+                an_move += "-O"
 
         if self.check:
             if self.checkmate:
-                an += "#"
+                an_move += "#"
             else:
-                an += "+"
+                an_move += "+"
 
-        self.an_moves.append(an)
+        self.an_moves.append(an_move)
 
     def store_position_occurrence(self):
         """Stores the board position and parts of the game status for the threefold repetition rule."""
@@ -217,9 +217,9 @@ class Game:
         if ai_move:
             self.move_piece(ai_move[0], ai_move[1])
 
-    def move_piece_an(self, an):
+    def move_piece_an(self, an_move):
         """Applies a move described in algebraic notation."""
-        matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])\S?([N|B|R|Q])?", an)
+        matches = re.search("([A-Z]?)([a-w]?)([0-9]?)x?([a-z][0-9])\S?([N|B|R|Q])?", an_move)
         if matches:
             match_to = matches.group(4)
 
@@ -260,9 +260,9 @@ class Game:
         else:
             to_y = from_y = self.board.width - 1 if self.white_to_move else 0
             from_x = self.board.get_king_coordinates(self.white_to_move)[0]
-            if an == "O-O" or an == "0-0":
+            if an_move in ("O-O", "0-0"):
                 to_x = self.board.width - 2
-            elif an == "O-O-O" or an == "0-0-0":
+            elif an_move in ("O-O-O", "0-0-0"):
                 to_x = 2
 
         self.move_piece((from_x, from_y), (to_x, to_y))

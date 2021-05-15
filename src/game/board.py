@@ -7,6 +7,7 @@ class Board:
 
     def __init__(self):
         self.width = 8
+        self.pieces = None
         self.moves = []
         self.load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.promotion_piece = "Q"
