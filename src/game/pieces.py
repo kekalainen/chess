@@ -6,6 +6,7 @@ class Piece:
     diagonal = True
     can_move_over_other_pieces = False
     range = 1
+    value = 1
 
     def __init__(self, white: bool, board_width: int):
         if not white:  # black
@@ -74,6 +75,7 @@ class Pawn(Piece):
 class Knight(Piece):
     name = "N"
     can_move_over_other_pieces = True
+    value = 3
 
     def moves(self):
         return [(-1, 2), (1, 2), (2, -1), (2, 1), (-1, -2), (1, -2), (-2, -1), (-2, 1)]
@@ -84,21 +86,25 @@ class Bishop(Piece):
     horizontal = False
     vertical = False
     range = float("inf")
+    value = 3
 
 
 class Rook(Piece):
     name = "R"
     diagonal = False
     range = float("inf")
+    value = 5
 
 
 class Queen(Piece):
     name = "Q"
     range = float("inf")
+    value = 9
 
 
 class King(Piece):
     name = "K"
+    value = 99
 
     def moves(self):
         return Piece.moves(self) + [(-2, 0), (2, 0)]

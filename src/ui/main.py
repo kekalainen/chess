@@ -34,20 +34,20 @@ class MainFrame(tk.Frame):
         self.tabs.add(self.tabs_game, text="Game")
 
         self.start_frame = tk.Frame(self.tabs_game)
-        self.start_frame.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
+        self.start_frame.grid(row=0, column=0, pady=pady, sticky="NW")
         self.start_btn = tk.Button(
             self.start_frame, text="Play", command=self.start_game
         )
         self.start_btn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
         self.ai_difficulty = tk.IntVar(self, -1)
-        for ai_difficulty in [(0, "2 players", -1), (1, "Random AI", 0)]:
+        for ai_difficulty in [((0, 0), "2 players", -1), ((1, 0), "Random AI", 0), ((0, 1), "Normal AI", 1)]:
             radio_btn = tk.Radiobutton(
                 self.start_frame,
                 variable=self.ai_difficulty,
                 text=ai_difficulty[1],
                 val=ai_difficulty[2],
             )
-            radio_btn.grid(row=0, column=ai_difficulty[0] + 1, pady=pady, sticky="NW")
+            radio_btn.grid(row=ai_difficulty[0][1], column=ai_difficulty[0][0] + 1, pady=pady, sticky="NW")
 
         self.status_frame = tk.Frame(self.tabs_game)
         self.status_frame.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
