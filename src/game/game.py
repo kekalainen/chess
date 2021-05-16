@@ -9,7 +9,7 @@ from game.board import Board
 class Game:
     """A class for handling game logic and state. Contains a board for keeping track of pieces."""
 
-    def __init__(self, on_update, ai_difficulty=-1):
+    def __init__(self, on_update=None, ai_difficulty=-1):
         """Initializes a game and creates a board.
 
         Args:
