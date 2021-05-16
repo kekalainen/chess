@@ -169,6 +169,22 @@ class MainFrame(tk.Frame):
         )
         sound_checkbtn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
 
+        self.theme = tk.StringVar(self, self.db_get_setting("theme", "Classic"))
+
+        theme_frame = tk.Frame(self.tabs_settings)
+        theme_frame.grid(row=1, column=0, pady=pady)
+
+        theme_label = tk.Label(theme_frame, text="Theme")
+        theme_label.grid(row=0, column=0, padx=padx, sticky="NW")
+        theme_combobox = Combobox(
+            theme_frame,
+            textvariable=self.theme,
+            values=["Classic", "Dark"],
+            state="readonly",
+        )
+        theme_combobox.bind("<<ComboboxSelected>>", self.update_theme)
+        theme_combobox.grid(row=1, column=0, padx=padx, pady=pady)
+
         credits_btn = tk.Button(
             self.tabs_settings,
             text="Credits",
@@ -182,7 +198,7 @@ class MainFrame(tk.Frame):
                 ),
             ),
         )
-        credits_btn.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
+        credits_btn.grid(row=2, column=0, padx=padx, pady=pady, sticky="NW")
 
         quit_btn = tk.Button(self, text="Quit", command=self.master.destroy)
         quit_btn.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
@@ -281,6 +297,17 @@ class MainFrame(tk.Frame):
             + ".mp3",
             block=False,
         )
+
+    def update_theme(self, event=None):
+        """Stores the selected theme and updates the board, if necessary."""
+        theme = self.theme.get()
+        self.db_store_setting("theme", theme)
+        if hasattr(self, "game"):
+            colors = ["#542E1D", "#EFD8B0"]
+            if theme == "Dark":
+                colors = ["#9C9C9C", "#4A4A4A"]
+            self.board_frame.tile_colors = colors
+            self.board_frame.draw_board()
 
     def on_game_update(self):
         game_over_previously = "to move" not in self.status_label["text"]
@@ -391,6 +418,7 @@ class MainFrame(tk.Frame):
                 tile_width=self.board_tile_width,
                 view_mode=view_mode,
             )
+            self.update_theme()
             self.master.bind("<Configure>", self.board_window_follow)
             self.board_window.protocol("WM_DELETE_WINDOW", self.on_board_window_close)
 
