@@ -3,6 +3,7 @@ import tkinter.messagebox
 from tkinter.ttk import Notebook, Combobox
 from tkinter.scrolledtext import ScrolledText
 from tkinter import filedialog, simpledialog
+from platform import system
 from playsound import playsound
 import threading
 import os
@@ -158,17 +159,18 @@ class MainFrame(tk.Frame):
         self.tabs.add(self.tabs_settings, text="Settings")
 
         self.enable_sounds = tk.BooleanVar(
-            value=self.db_get_setting("enable_sounds", "1") == "1"
+            value=self.db_get_setting("enable_sounds", "0") == "1"
         )
-        sound_checkbtn = tk.Checkbutton(
-            self.tabs_settings,
-            text="Enable sounds",
-            variable=self.enable_sounds,
-            command=lambda: self.db_store_setting(
-                "enable_sounds", "1" if self.enable_sounds.get() else "0"
-            ),
-        )
-        sound_checkbtn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
+        if system() != "Linux":
+            sound_checkbtn = tk.Checkbutton(
+                self.tabs_settings,
+                text="Enable sounds",
+                variable=self.enable_sounds,
+                command=lambda: self.db_store_setting(
+                    "enable_sounds", "1" if self.enable_sounds.get() else "0"
+                ),
+            )
+            sound_checkbtn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
 
         self.theme = tk.StringVar(self, self.db_get_setting("theme", "Classic"))
 
