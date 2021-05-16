@@ -11,3 +11,10 @@ class Game(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     pgn = Column(String)
+
+class Setting(Base):
+    """An ORM model for settings."""
+    __tablename__ = "settings"
+
+    name = Column(String, primary_key=True)
+    value = Column(String)

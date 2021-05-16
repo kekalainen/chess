@@ -3,12 +3,13 @@ import tkinter.messagebox
 from tkinter.ttk import Notebook, Combobox
 from tkinter.scrolledtext import ScrolledText
 from tkinter import filedialog, simpledialog
+from playsound import playsound
 import os
 import re
 
 from .board import BoardFrame
 from game.game import Game
-from db.models import Game as GameModel
+from db.models import Game as GameModel, Setting as SettingModel
 
 
 class MainFrame(tk.Frame):
@@ -155,6 +156,19 @@ class MainFrame(tk.Frame):
         self.tabs_settings = tk.Frame(self.tabs)
         self.tabs.add(self.tabs_settings, text="Settings")
 
+        self.enable_sounds = tk.BooleanVar(
+            value=self.db_get_setting("enable_sounds", "1") == "1"
+        )
+        sound_checkbtn = tk.Checkbutton(
+            self.tabs_settings,
+            text="Enable sounds",
+            variable=self.enable_sounds,
+            command=lambda: self.db_store_setting(
+                "enable_sounds", "1" if self.enable_sounds.get() else "0"
+            ),
+        )
+        sound_checkbtn.grid(row=0, column=0, padx=padx, pady=pady, sticky="NW")
+
         credits_btn = tk.Button(
             self.tabs_settings,
             text="Credits",
@@ -168,7 +182,7 @@ class MainFrame(tk.Frame):
                 ),
             ),
         )
-        credits_btn.grid(row=0, column=0, padx=padx, pady=pady)
+        credits_btn.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
 
         quit_btn = tk.Button(self, text="Quit", command=self.master.destroy)
         quit_btn.grid(row=1, column=0, padx=padx, pady=pady, sticky="NW")
@@ -231,7 +245,45 @@ class MainFrame(tk.Frame):
             self.db_session.commit()
             self.db_load_games()
 
+    def db_get_setting(self, name, fallback):
+        setting = (
+            self.db_session.query(SettingModel)
+            .filter(SettingModel.name == name)
+            .first()
+        )
+        if setting:
+            return setting.value
+        return fallback
+
+    def db_store_setting(self, name, value):
+        setting = (
+            self.db_session.query(SettingModel)
+            .filter(SettingModel.name == name)
+            .first()
+        )
+        if setting:
+            setting.value = value
+        else:
+            setting = SettingModel(name=name, value=str(value))
+        self.db_session.add(setting)
+        self.db_session.commit()
+
+    def play_move_sound(self, undo=False):
+        """Plays a sound for a moving piece."""
+        playsound(
+            "src/audio/move_"
+            + (
+                "2"
+                if (undo and not self.game.white_to_move)
+                or (not undo and self.game.white_to_move)
+                else "1"
+            )
+            + ".mp3",
+            block=False,
+        )
+
     def on_game_update(self):
+        game_over_previously = "to move" not in self.status_label["text"]
         text = ""
 
         if self.game.check and not self.game.checkmate:
@@ -289,12 +341,21 @@ class MainFrame(tk.Frame):
         if hasattr(self.game, "ai") and self.game.white_to_move:
             self.board_frame.draw_pieces()
 
+        moves_length = len(self.game.an_moves)
+        if self.enable_sounds.get() and self.previous_moves_length != moves_length:
+            undo = self.previous_moves_length > moves_length
+            if hasattr(self.game, "ai") and undo and not game_over_previously:
+                self.play_move_sound(not undo)
+            self.play_move_sound(undo)
+            self.previous_moves_length = moves_length
+
     def on_promotion_piece_selected(self):
         if hasattr(self, "game"):
             self.game.board.promotion_piece = self.promotion_piece.get()
 
     def start_game(self, view_mode=False):
         if not hasattr(self, "game"):
+            self.previous_moves_length = 0
             if view_mode:
                 self.active_pgn = re.findall(
                     "((?!-)[a-zA-Z0-]+[0-9]?\w+=?[N|B|R|Q]?)(?![^{]*})(?![^[]*])",

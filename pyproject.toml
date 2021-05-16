@@ -10,6 +10,7 @@ python = "^3.8"
 invoke = "^1.5.0"
 Pillow = "^8.2.0"
 SQLAlchemy = "^1.4.13"
+playsound = "^1.2.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
