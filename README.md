@@ -10,6 +10,8 @@ A desktop application which can be used for playing chess, storing past games an
 
 [Architecture description](documentation/architecture_description.md)
 
+[Testing document](documentation/testing-document.md)
+
 [Timesheet](documentation/timesheet.md)
 
 ## Releases
