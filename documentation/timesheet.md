@@ -17,4 +17,5 @@
 | 5.5.  | 4     | Implemented the en passant capture and pawn promotion. Initial work on castling implementation.
 | 6.5.  | 10    | Finished work on castling. Implemented threefold repetition and fifty-move rule. Implemented a simple AI opponent.
 | 15.5  | 1     | Added another AI difficulty.
-| **Total** | 61
+| 16.5  | 4     | Added move sounds and themes. Fixed bugs. Wrote the testing document.
+| **Total** | 65
