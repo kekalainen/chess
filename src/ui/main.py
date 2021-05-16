@@ -344,14 +344,14 @@ class MainFrame(tk.Frame):
             else:
                 move_log += "\n"
 
-        if self.game.checkmate or self.game.draw:
+        if self.game.checkmate or self.game.stalemate or self.game.draw:
             move_log = move_log[0 : len(move_log) - 1] + " "
             if self.game.checkmate:
                 if self.game.white_to_move:
                     move_log += "0-1"
                 else:
                     move_log += "1-0"
-            elif self.game.draw:
+            else:
                 move_log += "1/2-1/2"
 
         self.moves_text.config(state=tk.NORMAL)
