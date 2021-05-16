@@ -4,6 +4,7 @@ from tkinter.ttk import Notebook, Combobox
 from tkinter.scrolledtext import ScrolledText
 from tkinter import filedialog, simpledialog
 from playsound import playsound
+import threading
 import os
 import re
 
@@ -286,17 +287,20 @@ class MainFrame(tk.Frame):
 
     def play_move_sound(self, undo=False):
         """Plays a sound for a moving piece."""
-        playsound(
-            "src/audio/move_"
-            + (
-                "2"
-                if (undo and not self.game.white_to_move)
-                or (not undo and self.game.white_to_move)
-                else "1"
-            )
-            + ".mp3",
-            block=False,
-        )
+        threading.Thread(
+            target=playsound,
+            args=(
+                "src/audio/move_"
+                + (
+                    "2"
+                    if (undo and not self.game.white_to_move)
+                    or (not undo and self.game.white_to_move)
+                    else "1"
+                )
+                + ".mp3",
+            ),
+            daemon=True,
+        ).start()
 
     def update_theme(self, event=None):
         """Stores the selected theme and updates the board, if necessary."""
