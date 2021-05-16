@@ -391,7 +391,7 @@ class MainFrame(tk.Frame):
             self.previous_moves_length = 0
             if view_mode:
                 self.active_pgn = re.findall(
-                    "((?!-)[a-zA-Z0-]+[0-9]?\w+=?[N|B|R|Q]?)(?![^{]*})(?![^[]*])",
+                    "((?!-)[a-zA-Z0-]+[0-9]?\w+(?!\.)=?[N|B|R|Q]?)(?![^{]*})(?![^[]*])",
                     self.pgn_text.get(1.0, tk.END),
                 )
                 if not self.active_pgn:

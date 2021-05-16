@@ -227,10 +227,10 @@ class Game:
             to_y = self.board.width - int(match_to[1])
 
             piece_name = matches.group(1) or "P"
-            from_x = matches.group(2)
+            from_x = matches.group(2) or None
             if from_x:
                 from_x = ascii_lowercase.index(from_x)
-            from_y = matches.group(3)
+            from_y = matches.group(3) or None
             if from_y:
                 from_y = self.board.width - int(from_y)
 
@@ -241,16 +241,21 @@ class Game:
                 ):
                     for to_xy in self.legal_moves[from_xy]:
                         if to_xy == (to_x, to_y):
-                            if not from_x and not from_y:
+                            if from_x is None and from_y is None:
                                 from_x = from_xy[0]
                                 from_y = from_xy[1]
                                 break
-                            elif not from_x:
+                            elif from_x is None:
                                 if from_y == from_xy[1]:
                                     from_x = from_xy[0]
                                     break
-                            else:
+                            elif from_y is None:
                                 if from_x == from_xy[0]:
+                                    from_y = from_xy[1]
+                                    break
+                            else:
+                                if from_x == from_xy[0] and from_y == from_xy[1]:
+                                    from_x = from_xy[0]
                                     from_y = from_xy[1]
                                     break
 
