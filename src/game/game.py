@@ -207,7 +207,7 @@ class Game:
                         self.can_claim_draw[1] = True
                 self.dispatch_update()
                 if hasattr(self, "ai") and not self.white_to_move:
-                    threading.Thread(target=self.move_piece_ai_thread_target).start()
+                    threading.Thread(target=self.move_piece_ai_thread_target, daemon=True).start()
                 return True
         return False
 
